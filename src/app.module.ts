@@ -8,6 +8,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { SupabaseStrategy } from './auth/strategies/supabase.strategy';
 
 dotenv.config();
 
@@ -26,6 +28,7 @@ dotenv.config();
       inject: [ConfigService],
     }),
     PrismaModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -33,6 +36,10 @@ dotenv.config();
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SupabaseStrategy,
     },
     AppService,
   ],

@@ -17,4 +17,9 @@ export default () => ({
     ttl: int(process.env.RATELIMIT_TTL, 10000),
     limit: int(process.env.RATELIMIT_LIMIT, 50),
   },
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_KEY,
+    jwt_secret: process.env.SUPABASE_JWT_SECRET,
+  },
 });
