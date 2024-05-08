@@ -10,25 +10,49 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+  supabaseClient: SupabaseClient;
   constructor(
-    private supabaseClient: SupabaseClient,
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
     this.supabaseClient = createClient(
       this.configService.get<string>('supabase.url'),
       this.configService.get<string>('supabase.key'),
+      {
+        auth: {
+          persistSession: false,
+        },
+      },
     );
   }
+
   async login({ email, password }: LoginDto) {
     return this.supabaseClient.auth
       .signInWithPassword({
         email,
         password,
       })
-      .then((value) => {
-        const { session, user, weakPassword } = value.data;
-        console.log(session, user, weakPassword);
+      .then(async (value) => {
+        const { session, user } = value.data;
+        if (value.error)
+          if (value.error?.message == 'Email not confirmed') {
+            const informationUser = await this.prisma.users.findUnique({
+              where: {
+                email,
+              },
+            });
+            await this.supabaseClient.auth.admin.updateUserById(
+              informationUser.supabase_id,
+              {
+                email_confirm: true,
+              },
+            );
+            const response = await this.supabaseClient.auth.signInWithPassword({
+              email,
+              password,
+            });
+            return response.data.session;
+          } else throw new UnauthorizedException();
         return session;
       })
       .catch((err) => {
@@ -51,15 +75,15 @@ export class AuthService {
       })
       .then(async (value) => {
         const { session, user } = value.data;
-        console.log(session, user);
-        const { created_at, email, id, phone, role, user_metadata } = user;
+        // console.log(user);
+        const { created_at, email, id, phone, user_metadata } = user;
 
         const newUser = await this.prisma.users.create({
           data: {
             email,
             supabase_id: id,
             phone,
-            role,
+            role: '',
             createdAt: created_at,
           },
         });

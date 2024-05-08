@@ -5,7 +5,7 @@ const bool = (val: string | undefined, bool: boolean): boolean =>
 
 export default () => ({
   port: int(process.env.PORT, 5000),
-  database: process.env.DATABASE_URL,
+  database: process.env.MONGODB_STRING,
   db: {
     host: process.env.HOST,
     port: int(process.env.PORT, 27017),
@@ -18,8 +18,12 @@ export default () => ({
     limit: int(process.env.RATELIMIT_LIMIT, 50),
   },
   supabase: {
-    url: process.env.SUPABASE_URL,
-    key: process.env.SUPABASE_KEY,
-    jwt_secret: process.env.SUPABASE_JWT_SECRET,
+    url: process.env.SUPERBASE_PROJECT_URL,
+    key: process.env.SUPERBASE_API_KEY,
+    jwt_secret: process.env.SUPERBASE_JWT_TOKEN,
+    admin: {
+      email: process.env.SUPERBASE_ADMIN_EMAIL,
+      password: process.env.SUPERBASE_ADMIN_PASSWORD,
+    },
   },
 });

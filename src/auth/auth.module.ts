@@ -5,10 +5,12 @@ import { SupabaseStrategy } from './strategies/supabase.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Module({
   imports: [PassportModule, PrismaModule, ConfigModule],
   controllers: [AuthController],
   providers: [AuthService, SupabaseStrategy],
+  exports: [SupabaseStrategy],
 })
 export class AuthModule {}
