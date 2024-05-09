@@ -54,3 +54,15 @@ export class RegisterDto {
   @IsNotEmpty()
   password: string;
 }
+
+export class RefreshTokenDto {
+  @ApiProperty({
+    type: 'string',
+    name: 'refresh_token',
+    description: 'la propriété refresh_token de type string',
+    default: '',
+  })
+  @IsString()
+  @IsNotEmpty()
+  refresh_token: string;
+}

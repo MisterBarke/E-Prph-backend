@@ -1,9 +1,10 @@
 import {
   HttpException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { LoginDto, RegisterDto } from './dto/create-auth.dto';
+import { LoginDto, RefreshTokenDto, RegisterDto } from './dto/create-auth.dto';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
@@ -24,6 +25,19 @@ export class AuthService {
         },
       },
     );
+  }
+  async retreiveNewSession({ refresh_token }: RefreshTokenDto) {
+    return this.supabaseClient.auth
+      .refreshSession({
+        refresh_token,
+      })
+      .then((res) => {
+        if (res.error?.status) {
+          throw new HttpException(res.error.message, res.error.status);
+        }
+        const { session, user } = res.data;
+        return session;
+      });
   }
 
   async login({ email, password }: LoginDto) {
@@ -74,6 +88,9 @@ export class AuthService {
         password,
       })
       .then(async (value) => {
+        if (value.error?.status) {
+          throw new HttpException(value.error.message, value.error.status);
+        }
         const { session, user } = value.data;
         // console.log(user);
         const { created_at, email, id, phone, user_metadata } = user;
