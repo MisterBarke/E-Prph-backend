@@ -26,4 +26,11 @@ export default () => ({
       password: process.env.SUPERBASE_ADMIN_PASSWORD,
     },
   },
+  mail: {
+    host: process.env.MAIL_HOST_NAME,
+    isSecure: bool(process.env.MAIL_HOST_SECURE, true),
+    user: process.env.MAIL_AUTH_USER,
+    password: process.env.MAIL_AUTH_PASSWORD,
+    from: process.env.MAIL_DEFAULT_FROM,
+  },
 });

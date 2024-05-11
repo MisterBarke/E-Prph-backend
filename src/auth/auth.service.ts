@@ -8,6 +8,7 @@ import { LoginDto, RefreshTokenDto, RegisterDto } from './dto/create-auth.dto';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private mailService: MailService,
   ) {
     this.supabaseClient = createClient(
       this.configService.get<string>('supabase.url'),

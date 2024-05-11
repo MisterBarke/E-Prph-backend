@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { SupabaseStrategy } from './auth/strategies/supabase.strategy';
+import { MailModule } from './mail/mail.module';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ dotenv.config();
     }),
     PrismaModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
