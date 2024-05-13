@@ -43,7 +43,9 @@ export class RegisterDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+}
 
+export class updatePasswordDto {
   @ApiProperty({
     type: 'string',
     name: 'password',

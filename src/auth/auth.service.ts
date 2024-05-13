@@ -4,11 +4,17 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { LoginDto, RefreshTokenDto, RegisterDto } from './dto/create-auth.dto';
+import {
+  LoginDto,
+  RefreshTokenDto,
+  RegisterDto,
+  updatePasswordDto,
+} from './dto/create-auth.dto';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from 'src/mail/mail.service';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -41,6 +47,25 @@ export class AuthService {
         return session;
       });
   }
+  async updatePassword(id: string, { password }: updatePasswordDto) {
+    return this.supabaseClient.auth.admin
+      .updateUserById(id, { password })
+      .then(async (res) => {
+        if (res.error?.status) {
+          throw new HttpException(res.error.message, res.error.status);
+        }
+        const { user } = res.data;
+        const dataUsers = await this.prisma.users.update({
+          where: {
+            supabase_id: id,
+          },
+          data: {
+            isPasswordInit: true,
+          },
+        });
+        return user;
+      });
+  }
 
   async login({ email, password }: LoginDto) {
     return this.supabaseClient.auth
@@ -67,7 +92,10 @@ export class AuthService {
               email,
               password,
             });
-            return response.data.session;
+            return {
+              ...response.data.session,
+              isPasswordInit: informationUser.isPasswordInit,
+            };
           } else throw new UnauthorizedException();
         return session;
       })
@@ -76,7 +104,17 @@ export class AuthService {
       });
   }
 
-  async register({ email, password }: RegisterDto) {
+  generatePassword() {
+    const alphabets = 'AZERTYUIOPMLKJHGFDSQWXCVBN'.split('');
+    return `${Math.floor(Math.random() * 100000000)}`
+      .split('')
+      .map((el, i) =>
+        i % 3 == 0 ? alphabets[Math.floor(Math.random() * 25)] : el,
+      )
+      .join('');
+  }
+
+  async register({ email }: RegisterDto) {
     const retreiveUser = await this.prisma.users.findUnique({
       where: {
         email,
@@ -84,6 +122,7 @@ export class AuthService {
     });
     if (retreiveUser) throw new HttpException('User already exist', 409);
 
+    const password = this.generatePassword();
     return this.supabaseClient.auth
       .signUp({
         email,
@@ -102,8 +141,23 @@ export class AuthService {
             email,
             supabase_id: id,
             phone,
-            role: '',
+            role: Role.ADMIN,
             createdAt: created_at,
+          },
+        });
+
+        this.mailService.sendMail({
+          companyContry: 'Niger',
+          companyName: 'BAGRI',
+          email,
+          subject: 'Informations de connexions',
+          template: 'credential',
+          title:
+            'Bienvenue au Parapheur de BAGRI, Veuiller se connecter avec le mot de passe',
+          context: {
+            username: email.split('@')[0].split('.').join(' '),
+            companyName: 'BAGRI',
+            password,
           },
         });
 

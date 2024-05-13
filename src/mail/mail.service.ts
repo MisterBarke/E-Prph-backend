@@ -14,7 +14,7 @@ import {
 export class MailService {
   constructor(private mailerService: MailerService) {}
 
-  async sendUserConfirmation(data: CreateMailDto<CredentialMailDTO>) {
+  async sendMail(data: CreateMailDto<CredentialMailDTO>) {
     const UTF8 = 'utf-8';
     const templatesDir = join(__dirname, mailTemplateDirectory);
 
@@ -49,7 +49,7 @@ export class MailService {
       });
   }
 
-  compileHandlebarsTemplate(templateContent: string, context: any) {
+  private compileHandlebarsTemplate(templateContent: string, context: any) {
     const template = handelbars.compile(templateContent);
     const compiledTemplate = template(context);
     return compiledTemplate;

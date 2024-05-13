@@ -10,9 +10,17 @@ datasource db {
 model Users {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   email       String   @unique
-  supabase_id String
+  supabase_id String   @unique
   phone       String
-  role        String
+  role        Role
+  isPasswordInit Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+  ADMIN_MEMBER
+  SUDO
 }
