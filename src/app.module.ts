@@ -15,6 +15,7 @@ import { SupabaseStrategy } from './auth/strategies/supabase.strategy';
 import { MailModule } from './mail/mail.module';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { JwtAuthGuard } from './auth/guards/supabase.guard';
+import { UploadModule } from './upload/upload.module';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ dotenv.config();
     PrismaModule,
     AuthModule,
     MailModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

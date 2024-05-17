@@ -8,14 +8,49 @@ datasource db {
 }
 
 model Users {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  email       String   @unique
-  supabase_id String   @unique
-  phone       String
-  role        Role
-  isPasswordInit Boolean @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  email          String       @unique
+  supabase_id    String       @unique
+  phone          String
+  matricule      String
+  role           Role
+  signatures     Signatures[] @relation("signatures")
+  signateursRole     Signateurs[] @relation("signateurs")
+  isPasswordInit Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Documents {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  data       String
+  title      String
+  createdBy  String
+  signateurs Signateurs[] @relation("documentssignateurs")
+  signatures Signatures[] @relation("signer")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Signateurs {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  user       Users     @relation("signateurs", fields: [userId], references: [id])
+  userId     String    @db.ObjectId
+  document   Documents @relation("documentssignateurs", fields: [documentId], references: [id])
+  documentId String    @db.ObjectId
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Signatures {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  user       Users     @relation("signatures", fields: [userId], references: [id])
+  userId     String    @db.ObjectId
+  document   Documents @relation("signer", fields: [documentId], references: [id])
+  documentId String    @db.ObjectId
+  signedAt   DateTime
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 enum Role {
