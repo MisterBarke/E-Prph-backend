@@ -6,10 +6,17 @@ import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MailModule } from 'src/mail/mail.module';
+import { MailModule } from '../mail/mail.module';
+import { SupabaseModule } from '../supabase.module';
 
 @Module({
-  imports: [PassportModule, PrismaModule, ConfigModule, MailModule],
+  imports: [
+    PassportModule,
+    SupabaseModule,
+    PrismaModule,
+    ConfigModule,
+    MailModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService, SupabaseStrategy],
   exports: [SupabaseStrategy],

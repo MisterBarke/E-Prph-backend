@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   Query,
   UploadedFile,
@@ -16,7 +17,16 @@ export class UploadController {
   @Public() //TODO: delete public
   @Post('file')
   @UseInterceptors(FileInterceptor('file'))
-  public async uploadFile(@UploadedFile() file) {
-    return this.uploadService.uploadFile(file);
+  public async uploadFile(
+    @UploadedFile() file,
+    @Query('type') fileType: string,
+  ) {
+    return this.uploadService.uploadFile(file, fileType);
+  }
+
+  @Public() //TODO: delete public
+  @Get('file')
+  public async getFile(@Query('type') fileType: string) {
+    return this.uploadService.getFile(fileType);
   }
 }

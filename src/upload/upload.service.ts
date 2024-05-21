@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -20,8 +20,8 @@ export class UploadService {
       },
     );
   }
-  async uploadFile(file: Express.Multer.File) {
-    const folder = 'dossiers';
+  async uploadFile(file: Express.Multer.File, fileType?: string) {
+    const folder = fileType ?? 'dossiers';
     const name = `ph_${Math.ceil(Math.random() * 1000)}ph_${Date.now()}ph_${
       file.originalname
     }`;
@@ -36,5 +36,20 @@ export class UploadService {
       };
 
     return supabaseResp.error;
+  }
+
+  async getFile(pathFile: string) {
+    return this.supabaseClient.storage
+      .from('')
+      .download(pathFile)
+      .then((res) => {
+        if (res.error) {
+          throw new HttpException(res.error.message, 401);
+        }
+        return res.data;
+      })
+      .catch((err) => {
+        throw new HttpException(err?.message, 401);
+      });
   }
 }

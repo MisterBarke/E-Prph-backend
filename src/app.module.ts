@@ -46,10 +46,7 @@ dotenv.config();
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
-    {
-      provide: APP_GUARD,
-      useClass: SupabaseStrategy,
-    },
+    SupabaseStrategy,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
@@ -60,5 +57,6 @@ dotenv.config();
     },
     AppService,
   ],
+  exports: [SupabaseStrategy],
 })
 export class AppModule {}

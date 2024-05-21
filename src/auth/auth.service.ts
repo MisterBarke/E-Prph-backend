@@ -68,6 +68,11 @@ export class AuthService {
   }
 
   async login({ email, password }: LoginDto) {
+    const informationUser = await this.prisma.users.findUnique({
+      where: {
+        email,
+      },
+    });
     return this.supabaseClient.auth
       .signInWithPassword({
         email,
@@ -77,11 +82,6 @@ export class AuthService {
         const { session, user } = value.data;
         if (value.error)
           if (value.error?.message == 'Email not confirmed') {
-            const informationUser = await this.prisma.users.findUnique({
-              where: {
-                email,
-              },
-            });
             await this.supabaseClient.auth.admin.updateUserById(
               informationUser.supabase_id,
               {
@@ -97,7 +97,7 @@ export class AuthService {
               isPasswordInit: informationUser.isPasswordInit,
             };
           } else throw new UnauthorizedException();
-        return session;
+        return { ...session, isPasswordInit: informationUser.isPasswordInit };
       })
       .catch((err) => {
         throw new UnauthorizedException();
