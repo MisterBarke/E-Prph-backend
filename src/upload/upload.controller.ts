@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,19 +15,19 @@ import { Public } from 'src/auth/decorators/public.decorator';
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Public() //TODO: delete public
   @Post('file')
   @UseInterceptors(FileInterceptor('file'))
   public async uploadFile(
     @UploadedFile() file,
-    @Query('type') fileType: string,
+    // @Query('type') fileType: string,
   ) {
-    return this.uploadService.uploadFile(file, fileType);
+    return this.uploadService.uploadFile(file);
   }
 
-  @Public() //TODO: delete public
-  @Get('file')
-  public async getFile(@Query('type') fileType: string) {
-    return this.uploadService.getFile(fileType);
+  @Post('signature')
+  @UseInterceptors(FileInterceptor('file'))
+  public async getFile(@UploadedFile() file, @Req() request) {
+    const user = request.user;
+    return this.uploadService.uploadFile(file, true, user.id);
   }
 }

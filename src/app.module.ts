@@ -49,11 +49,11 @@ dotenv.config();
     SupabaseStrategy,
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: RolesGuard,
     },
     AppService,
   ],

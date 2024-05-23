@@ -133,7 +133,6 @@ export class AuthService {
           throw new HttpException(value.error.message, value.error.status);
         }
         const { session, user } = value.data;
-        // console.log(user);
         const { created_at, email, id, phone, user_metadata } = user;
 
         const newUser = await this.prisma.users.create({
@@ -141,7 +140,7 @@ export class AuthService {
             email,
             supabase_id: id,
             phone,
-            role: Role.ADMIN,
+            role: Role.MEMBER,
             createdAt: created_at,
           },
         });

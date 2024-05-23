@@ -20,7 +20,11 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
+
     const userFromDB = await this.usersService.findOneBySupabaseId(user.id);
+    //TODO: DEV Mode Active
+    if (userFromDB.role == 'SUDO') return true;
+
     if (!userFromDB) return false;
     return requiredRoles.some((el) => el == userFromDB.role);
   }

@@ -13,6 +13,7 @@ model Users {
   supabase_id    String       @unique
   phone          String
   matricule      String?
+  userSignatureUrl String?
   role           Role
   signatures     Signatures[] @relation("signatures")
   signateursRole     Signateurs[] @relation("signateurs")
