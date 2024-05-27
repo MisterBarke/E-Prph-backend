@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Req,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -41,6 +42,8 @@ export class AuthController {
   @Roles('ADMIN')
   @Post('register/group_admin/by_admin')
   registeAdminMember(@Body() registerDto: RegisterDto) {
+    if (!registerDto.departementName)
+      throw new HttpException('veuiller ajouter le nom du departement', 400);
     return this.authService.register(registerDto, Role.ADMIN_MEMBER);
   }
 

@@ -116,7 +116,10 @@ export class AuthService {
       .join('');
   }
 
-  async register({ email }: RegisterDto, role: Role = Role.MEMBER) {
+  async register(
+    { email, departementName }: RegisterDto,
+    role: Role = Role.MEMBER,
+  ) {
     const retreiveUser = await this.prisma.users.findUnique({
       where: {
         email,
@@ -161,6 +164,21 @@ export class AuthService {
             password,
           },
         });
+
+        //Create departement when create a departement admin member
+        if (role == Role.ADMIN_MEMBER) {
+          const departement = await this.prisma.departement.create({
+            data: {
+              title: departementName,
+              chef: {
+                connect: {
+                  id: newUser.id,
+                },
+              },
+            },
+          });
+          return { user: newUser, departement };
+        }
 
         return newUser;
       })

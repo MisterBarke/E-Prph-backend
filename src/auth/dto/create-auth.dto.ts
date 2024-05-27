@@ -43,6 +43,17 @@ export class RegisterDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'departementName',
+    description: 'la propriété departementName de type string',
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  departementName: string;
+
 }
 
 export class updatePasswordDto {

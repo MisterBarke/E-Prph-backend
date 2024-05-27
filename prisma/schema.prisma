@@ -17,6 +17,7 @@ model Users {
   role           Role
   signatures     Signatures[] @relation("signatures")
   signateursRole     Signateurs[] @relation("signateurs")
+  departement Departement[]  @relation("departement")
   isPasswordInit Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -35,12 +36,24 @@ model Documents {
   updatedAt  DateTime     @updatedAt
 }
 
+model Departement {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  chef       Users     @relation("departement", fields: [chefId], references: [id])
+  chefId     String    @db.ObjectId
+  folders Folders[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
 model Folders {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
   title      String
   description       String
   createdBy  String
   documents Documents[]
+  departement       Departement     @relation( fields: [departementId], references: [id])
+  departementId     String    @db.ObjectId
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 }
