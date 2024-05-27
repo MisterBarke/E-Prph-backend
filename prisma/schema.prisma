@@ -29,6 +29,18 @@ model Documents {
   createdBy  String
   signateurs Signateurs[] @relation("documentssignateurs")
   signatures Signatures[] @relation("signer")
+  folder       Folders     @relation( fields: [folderId], references: [id])
+  folderId     String    @db.ObjectId
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Folders {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  description       String
+  createdBy  String
+  documents Documents[]
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 }

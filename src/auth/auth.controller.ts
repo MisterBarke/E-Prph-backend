@@ -18,6 +18,7 @@ import {
 import { Public } from './decorators/public.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from './decorators/role.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -30,10 +31,24 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @Roles('ADMIN', 'ADMIN_MEMBER')
-  @Post('register')
+  @Roles('SUDO')
+  @Post('register/admin/by_super_admin')
   register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    return this.authService.register(registerDto, Role.ADMIN);
+  }
+
+  @ApiBearerAuth()
+  @Roles('ADMIN')
+  @Post('register/group_admin/by_admin')
+  registeAdminMember(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto, Role.ADMIN_MEMBER);
+  }
+
+  @ApiBearerAuth()
+  @Roles('ADMIN_MEMBER')
+  @Post('register')
+  registerMember(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto, 'MEMBER');
   }
 
   @Post('password/update')

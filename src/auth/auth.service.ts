@@ -106,6 +106,8 @@ export class AuthService {
 
   generatePassword() {
     const alphabets = 'AZERTYUIOPMLKJHGFDSQWXCVBN'.split('');
+    // TODO: Delete this after dev
+    return `123456`;
     return `${Math.floor(Math.random() * 100000000)}`
       .split('')
       .map((el, i) =>
@@ -114,7 +116,7 @@ export class AuthService {
       .join('');
   }
 
-  async register({ email }: RegisterDto) {
+  async register({ email }: RegisterDto, role: Role = Role.MEMBER) {
     const retreiveUser = await this.prisma.users.findUnique({
       where: {
         email,
@@ -140,7 +142,7 @@ export class AuthService {
             email,
             supabase_id: id,
             phone,
-            role: Role.MEMBER,
+            role,
             createdAt: created_at,
           },
         });

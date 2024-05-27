@@ -16,6 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
               user: configService.get('mail.user'),
               pass: configService.get('mail.password'),
             },
+            port: 465,
           },
           defaults: {
             from: configService.get('mail.from'),
