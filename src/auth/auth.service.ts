@@ -119,6 +119,7 @@ export class AuthService {
   async register(
     { email, departementName }: RegisterDto,
     role: Role = Role.MEMBER,
+    supabaseId?: string
   ) {
     const retreiveUser = await this.prisma.users.findUnique({
       where: {
@@ -178,6 +179,31 @@ export class AuthService {
             },
           });
           return { user: newUser, departement };
+        }
+
+        if (role == Role.MEMBER) {
+          const connectedUser = await this.prisma.users.findUnique({
+            where: {
+              supabase_id: supabaseId!,
+            },
+            include: {
+              departement: true
+            }
+          })
+          const updatedUser = await this.prisma.users.update({
+            where: {
+              id: newUser.id,
+            },
+            data: {
+              departement: {
+                connect: {
+                  id: connectedUser.id,
+                }
+              }
+            }
+          })
+
+          return { user: updatedUser, departement: connectedUser.departement };
         }
 
         return newUser;

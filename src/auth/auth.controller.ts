@@ -50,8 +50,8 @@ export class AuthController {
   @ApiBearerAuth()
   @Roles('ADMIN_MEMBER')
   @Post('register')
-  registerMember(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto, 'MEMBER');
+  registerMember(@Body() registerDto: RegisterDto, @Req() request) {
+    return this.authService.register(registerDto, 'MEMBER', request.user.id);
   }
 
   @Post('password/update')
