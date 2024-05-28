@@ -75,6 +75,37 @@ export class UsersService {
     });
   }
 
+  async findAllSignateur() {
+    return await this.prisma.users.findMany({
+      where: {
+        role: 'MEMBER'
+      },
+      include: {
+        departement: true,
+      }
+    });
+  }
+
+  async findAllDepartementMember(supabaseId: string) {
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        supabase_id: supabaseId,
+      },
+      include: {
+        departement: true,
+      }
+    });
+    return await this.prisma.users.findMany({
+      where: {
+        departement: {
+          some: {
+            id: connectedUser.departement[0]?.id,
+          }
+        }
+      }
+    });
+  }
+
   async findOne(id: string) {
     return await this.prisma.users.findUnique({
       where: { id },

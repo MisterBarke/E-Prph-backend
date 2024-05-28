@@ -24,7 +24,7 @@ import {
   UpdateUsersDto,
   PaginationParams,
 } from './dto/users.dto';
-import { Roles } from 'src/auth/decorators/role.decorator';
+import { Roles } from '../auth/decorators/role.decorator';
 
 @ApiTags('users')
 @Controller('users')
@@ -48,6 +48,46 @@ export class UsersController {
     @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
   ) {
     return this.usersService.findAll({ decalage, limit, dateDebut, dateFin });
+  }
+
+  @ApiCreatedResponse({ description: 'Tous les Users' })
+  @ApiResponse({
+    status: 200,
+    description: 'Les Users sont retrouvés',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'GetAllUsersSignateurs',
+  })
+  @Get('signateurs')
+  findAllSignateur(
+    //@Query('search') search: string,
+    @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
+  ) {
+    return this.usersService.findAllSignateur();
+  }
+
+  @ApiCreatedResponse({ description: 'Tous les Users' })
+  @ApiResponse({
+    status: 200,
+    description: 'Les Users sont retrouvés',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'GetAllUsersDepartementMember',
+  })
+  @Get('members')
+  findAllMember(
+    //@Query('search') search: string,
+    @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
+    @Req() request,
+  ) {
+
+    return this.usersService.findAllDepartementMember(request.user.id);
   }
 
   @ApiCreatedResponse({ description: 'Chercher un Users' })
