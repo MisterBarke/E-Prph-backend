@@ -20,6 +20,30 @@ export class UploadService {
       },
     );
   }
+  async getFiles(supabaseId: string) {
+    const connectedUser = await this.prisma.users.findFirst({
+      where: {
+        supabase_id: supabaseId,
+      },
+      include: {
+        departement: true,
+      },
+    });
+    const folder = await this.prisma.folders.findFirst({
+      where: {
+        isDefault: true,
+        departement: {
+          id: connectedUser.departement[0]?.id,
+        },
+      },
+      include: {
+        documents: true,
+      },
+    });
+
+    return folder?.documents;
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     signature = false,
@@ -45,6 +69,40 @@ export class UploadService {
             userSignatureUrl: url,
           },
         });
+      } else {
+        //set file to default folder
+        const connectedUser = await this.prisma.users.findFirst({
+          where: {
+            supabase_id: supabaseId,
+          },
+          include: {
+            departement: true,
+          },
+        });
+        const defaultFolder = await this.prisma.folders.findFirst({
+          where: {
+            isDefault: true,
+            departementId: connectedUser?.departement[0]?.id,
+          },
+        });
+        const newDocument = await this.prisma.documents.create({
+          data: {
+            title: file.originalname,
+            url,
+            folder: {
+              connect: {
+                id: defaultFolder.id,
+              },
+            },
+            createdBy: {
+              connect: {
+                id: connectedUser.id,
+              },
+            },
+          },
+        });
+
+        return newDocument;
       }
 
       return {

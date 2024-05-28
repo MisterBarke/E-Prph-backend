@@ -18,6 +18,8 @@ model Users {
   signatures     Signatures[] @relation("signatures")
   signateursRole     Signateurs[] @relation("signateurs")
   departement Departement[]  @relation("departement")
+  folders Folders[]
+  documents Documents[]
   isPasswordInit Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -25,11 +27,11 @@ model Users {
 
 model Documents {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
-  data       String
+  url       String
   title      String
-  createdBy  String
-  signateurs Signateurs[] @relation("documentssignateurs")
-  signatures Signatures[] @relation("signer")
+  createdBy        Users     @relation(fields: [createdById], references: [id])
+  createdById     String    @db.ObjectId
+  
   folder       Folders     @relation( fields: [folderId], references: [id])
   folderId     String    @db.ObjectId
   createdAt  DateTime     @default(now())
@@ -50,7 +52,11 @@ model Folders {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
   title      String
   description       String
-  createdBy  String
+  isDefault Boolean @default(false)
+  createdBy        Users     @relation(fields: [createdById], references: [id])
+  createdById     String    @db.ObjectId
+  signateurs Signateurs[] @relation("documentssignateurs")
+  signatures Signatures[] @relation("signer")
   documents Documents[]
   departement       Departement     @relation( fields: [departementId], references: [id])
   departementId     String    @db.ObjectId
@@ -58,12 +64,13 @@ model Folders {
   updatedAt  DateTime     @updatedAt
 }
 
+//Definis les signateurs pour un dossier
 model Signateurs {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   user       Users     @relation("signateurs", fields: [userId], references: [id])
   userId     String    @db.ObjectId
-  document   Documents @relation("documentssignateurs", fields: [documentId], references: [id])
-  documentId String    @db.ObjectId
+  folder   Folders @relation("documentssignateurs", fields: [folderId], references: [id])
+  folderId String    @db.ObjectId
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 }
@@ -72,8 +79,8 @@ model Signatures {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   user       Users     @relation("signatures", fields: [userId], references: [id])
   userId     String    @db.ObjectId
-  document   Documents @relation("signer", fields: [documentId], references: [id])
-  documentId String    @db.ObjectId
+  folder   Folders @relation("signer", fields: [folderId], references: [id])
+  folderId String    @db.ObjectId
   signedAt   DateTime
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt

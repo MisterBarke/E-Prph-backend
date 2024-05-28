@@ -20,8 +20,19 @@ export class UploadController {
   public async uploadFile(
     @UploadedFile() file,
     // @Query('type') fileType: string,
+    @Req() request,
   ) {
-    return this.uploadService.uploadFile(file);
+    const user = request.user;
+    return this.uploadService.uploadFile(file, false, user.id);
+  }
+
+  @Get('files')
+  public async getFiles(
+    // @Query('type') fileType: string,
+    @Req() request,
+  ) {
+    const user = request.user;
+    return this.uploadService.getFiles(user.id);
   }
 
   @Post('signature')
