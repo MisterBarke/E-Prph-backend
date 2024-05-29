@@ -33,7 +33,7 @@ model Documents {
   title      String
   createdBy        Users     @relation(fields: [createdById], references: [id])
   createdById     String    @db.ObjectId
-  
+  isPrincipal Boolean @default(false)
   folder       Folders     @relation( fields: [folderId], references: [id])
   folderId     String    @db.ObjectId
   createdAt  DateTime     @default(now())
@@ -61,8 +61,8 @@ model Folders {
   email       String?
   isDefault Boolean @default(false)
   isRejected Boolean @default(false)
-  rejected        Users     @relation("rejet", fields: [rejectedId], references: [id])
-  rejectedId     String    @db.ObjectId
+  rejected        Users?     @relation("rejet", fields: [rejectedId], references: [id])
+  rejectedId     String?    @db.ObjectId
   isValidateBeforeSignature Boolean @default(false)
   createdBy        Users     @relation(fields: [createdById], references: [id])
   createdById     String    @db.ObjectId
@@ -98,8 +98,8 @@ model Signatures {
 }
 
 enum Role {
-  ADMIN
-  MEMBER
-  ADMIN_MEMBER
-  SUDO
+  ADMIN //DSI
+  MEMBER //Signateur
+  ADMIN_MEMBER //Chef de departement
+  SUDO //Développeur
 }

@@ -51,6 +51,10 @@ export class FoldersService {
       },
     });
 
+    await this.assignSignateursToFolder(newData.id, {
+      signateurs: dto.signateurs,
+    });
+
     //Update files names
     for (let i = 0; i < dto.files.length; i++) {
       const element = dto.files[i];
@@ -116,11 +120,12 @@ export class FoldersService {
           signateurs: {
             connect: {
               id: element,
-            }
-          }
-        }
-      })
+            },
+          },
+        },
+      });
     }
+    return 'updated';
   }
 
   async folderValidationByServiceReseau(

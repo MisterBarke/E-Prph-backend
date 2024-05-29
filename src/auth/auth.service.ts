@@ -95,9 +95,14 @@ export class AuthService {
             return {
               ...response.data.session,
               isPasswordInit: informationUser.isPasswordInit,
+              user: informationUser,
             };
           } else throw new UnauthorizedException();
-        return { ...session, isPasswordInit: informationUser.isPasswordInit };
+        return {
+          ...session,
+          isPasswordInit: informationUser.isPasswordInit,
+          user: informationUser,
+        };
       })
       .catch((err) => {
         throw new UnauthorizedException();

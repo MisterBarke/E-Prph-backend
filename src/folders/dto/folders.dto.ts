@@ -33,6 +33,16 @@ class FileDto {
   @IsString()
   @IsNotEmpty()
   title: string;
+
+  @ApiProperty({
+    type: 'boolean',
+    name: 'isPrincipal',
+    description: 'la propriété isPrincipal de type string',
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isPrincipal: boolean;
 }
 
 export class AssignSignateurDto {
@@ -55,6 +65,9 @@ export class FolderValidationDto {
 export class CreateFoldersDto {
   @IsNotEmpty()
   files: FileDto[];
+
+  @IsNotEmpty()
+  signateurs: string[];
 
   @ApiProperty({
     type: 'string',
