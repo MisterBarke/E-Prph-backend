@@ -24,6 +24,7 @@ import {
   UpdateFoldersDto,
   PaginationParams,
   FolderValidationDto,
+  AssignSignateurDto,
 } from './dto/folders.dto';
 
 @ApiTags('folders')
@@ -166,6 +167,43 @@ export class FoldersController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateFoldersDto) {
     return this.foldersService.update(id, dto);
+  }
+
+  @ApiCreatedResponse({ description: 'Modification de Folders' })
+  @ApiResponse({
+    status: 200,
+    description: 'Folders est modifié',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: UpdateFoldersDto })
+  @ApiOperation({
+    operationId: 'UpdateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Put(':id/assign_signateurs')
+  assignSignateursToFolder(
+    @Param('id') id: string,
+    @Body() dto: AssignSignateurDto,
+  ) {
+    return this.foldersService.assignSignateursToFolder(id, dto);
   }
 
   @ApiCreatedResponse({ description: 'Modification de Folders' })

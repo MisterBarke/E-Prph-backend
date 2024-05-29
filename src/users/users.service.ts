@@ -75,10 +75,11 @@ export class UsersService {
     });
   }
 
-  async findAllSignateur() {
+  async findAllSignateur({ isSignateurDossierAgricole }: PaginationParams) {
     return await this.prisma.users.findMany({
       where: {
         role: 'MEMBER',
+        isSignateurDossierAgricole: isSignateurDossierAgricole ? true : false, 
       },
       include: {
         departement: true,

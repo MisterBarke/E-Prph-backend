@@ -9,6 +9,7 @@ import {
   UpdateFoldersDto,
   PaginationParams,
   FolderValidationDto,
+  AssignSignateurDto,
 } from './dto/folders.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -104,6 +105,24 @@ export class FoldersService {
     });
   }
 
+  async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
+    for (let i = 0; i < dto.signateurs.length; i++) {
+      const element = dto.signateurs[i];
+      await this.prisma.folders.update({
+        where: {
+          id,
+        },
+        data: {
+          signateurs: {
+            connect: {
+              id: element,
+            }
+          }
+        }
+      })
+    }
+  }
+
   async folderValidationByServiceReseau(
     id: string,
     data: FolderValidationDto,
@@ -161,16 +180,12 @@ export class FoldersService {
         adress: dto.adress ?? data.adress,
         telephone: dto.telephone ?? data.telephone,
         email: dto.email ?? data.email,
-        isDefault: dto.isDefault ?? data.isDefault,
-        createdById: dto.createdById ?? data.createdById,
-        documents: dto.documents ?? data.documents,
-        departementId: dto.departementId ?? data.departementId,
       },
     });
   }
 
   async delete(id: string) {
-    return await await this.prisma.folders.delete({
+    return await this.prisma.folders.delete({
       where: { id },
     });
   }

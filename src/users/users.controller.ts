@@ -64,9 +64,16 @@ export class UsersController {
   @Get('signateurs')
   findAllSignateur(
     //@Query('search') search: string,
-    @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
+    @Query()
+    {
+      decalage = 0,
+      limit = 20,
+      dateDebut,
+      dateFin,
+      isSignateurDossierAgricole,
+    }: PaginationParams,
   ) {
-    return this.usersService.findAllSignateur();
+    return this.usersService.findAllSignateur({ isSignateurDossierAgricole });
   }
 
   @ApiCreatedResponse({ description: 'Tous les Users' })

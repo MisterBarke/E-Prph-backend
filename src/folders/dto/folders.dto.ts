@@ -35,6 +35,11 @@ class FileDto {
   title: string;
 }
 
+export class AssignSignateurDto {
+  @IsNotEmpty()
+  signateurs: string[];
+}
+
 export class FolderValidationDto {
   @ApiProperty({
     type: 'boolean',

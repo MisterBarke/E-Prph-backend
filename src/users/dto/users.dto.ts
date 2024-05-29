@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsNotEmpty,
   Min,
+  IsBoolean,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
@@ -78,4 +79,9 @@ export class PaginationParams {
   @Type(() => String)
   @IsString()
   dateFin?: string;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isSignateurDossierAgricole?: boolean;
 }

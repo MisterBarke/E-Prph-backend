@@ -196,6 +196,7 @@ export class AuthService {
               id: newUser.id,
             },
             data: {
+              isSignateurDossierAgricole: isCreditAgricole ? true : false,
               departement: {
                 connect: {
                   id: connectedUser.id,
