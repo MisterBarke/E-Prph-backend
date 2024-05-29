@@ -117,9 +117,9 @@ export class AuthService {
   }
 
   async register(
-    { email, departementName }: RegisterDto,
+    { email, departementName, isCreditAgricole }: RegisterDto,
     role: Role = Role.MEMBER,
-    supabaseId?: string
+    supabaseId?: string,
   ) {
     const retreiveUser = await this.prisma.users.findUnique({
       where: {
@@ -171,6 +171,7 @@ export class AuthService {
           const departement = await this.prisma.departement.create({
             data: {
               title: departementName,
+              isCreditAgricole: isCreditAgricole ?? false,
               chef: {
                 connect: {
                   id: newUser.id,
@@ -187,9 +188,9 @@ export class AuthService {
               supabase_id: supabaseId!,
             },
             include: {
-              departement: true
-            }
-          })
+              departement: true,
+            },
+          });
           const updatedUser = await this.prisma.users.update({
             where: {
               id: newUser.id,
@@ -198,10 +199,10 @@ export class AuthService {
               departement: {
                 connect: {
                   id: connectedUser.id,
-                }
-              }
-            }
-          })
+                },
+              },
+            },
+          });
 
           return { user: updatedUser, departement: connectedUser.departement };
         }

@@ -78,11 +78,11 @@ export class UsersService {
   async findAllSignateur() {
     return await this.prisma.users.findMany({
       where: {
-        role: 'MEMBER'
+        role: 'MEMBER',
       },
       include: {
         departement: true,
-      }
+      },
     });
   }
 
@@ -93,16 +93,16 @@ export class UsersService {
       },
       include: {
         departement: true,
-      }
+      },
     });
     return await this.prisma.users.findMany({
       where: {
         departement: {
           some: {
             id: connectedUser.departement[0]?.id,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 

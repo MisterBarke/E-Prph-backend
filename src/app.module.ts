@@ -1,3 +1,5 @@
+import { FoldersModule } from './folders/folders.module';
+
 import { UsersModule } from './users/users.module';
 
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -21,6 +23,7 @@ dotenv.config();
 
 @Module({
   imports: [
+    FoldersModule,
     UsersModule,
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     ThrottlerModule.forRootAsync({

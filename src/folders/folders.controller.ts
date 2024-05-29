@@ -18,104 +18,133 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UsersService } from './users.service';
+import { FoldersService } from './folders.service';
 import {
-  CreateUsersDto,
-  UpdateUsersDto,
+  CreateFoldersDto,
+  UpdateFoldersDto,
   PaginationParams,
-} from './dto/users.dto';
-import { Roles } from '../auth/decorators/role.decorator';
+  FolderValidationDto,
+} from './dto/folders.dto';
 
-@ApiTags('users')
-@Controller('users')
-export class UsersController {
-  constructor(private usersService: UsersService) {}
+@ApiTags('folders')
+@Controller('folders')
+export class FoldersController {
+  constructor(private foldersService: FoldersService) {}
 
-  @ApiCreatedResponse({ description: 'Tous les Users' })
+  @ApiCreatedResponse({ description: 'Créer un nouveau Folders' })
+  @ApiResponse({
+    status: 201,
+    description: 'Folders est crée',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: CreateFoldersDto })
+  @ApiOperation({
+    operationId: 'CreateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Post('')
+  create(@Body() dto: CreateFoldersDto, @Req() request) {
+    return this.foldersService.create(dto, request.user.id);
+  }
+
+  @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
-    description: 'Les Users sont retrouvés',
+    description: 'Les Folders sont retrouvés',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
   @ApiOperation({
-    operationId: 'GetAllUsers',
+    operationId: 'GetAllFolders',
   })
   @Get('')
   findAll(
     //@Query('search') search: string,
     @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
   ) {
-    return this.usersService.findAll({ decalage, limit, dateDebut, dateFin });
+    return this.foldersService.findAll({ decalage, limit, dateDebut, dateFin });
   }
 
-  @ApiCreatedResponse({ description: 'Tous les Users' })
+  @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
-    description: 'Les Users sont retrouvés',
+    description: 'Les Folders sont retrouvés',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
   @ApiOperation({
-    operationId: 'GetAllUsersSignateurs',
+    operationId: 'GetAllFoldersByserviceReseau',
   })
-  @Get('signateurs')
-  findAllSignateur(
+  @Get('service_reseau')
+  findAllServiceReseau(
     //@Query('search') search: string,
-    @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
+    @Query()
+    {
+      decalage = 0,
+      limit = 20,
+      dateDebut,
+      dateFin,
+      isRejected,
+      isValidate,
+    }: PaginationParams,
   ) {
-    return this.usersService.findAllSignateur();
+    return this.foldersService.getFoldersByServiceReseau({
+      decalage,
+      limit,
+      dateDebut,
+      dateFin,
+      isRejected,
+      isValidate,
+    });
   }
 
-  @ApiCreatedResponse({ description: 'Tous les Users' })
+  @ApiCreatedResponse({ description: 'Chercher un Folders' })
   @ApiResponse({
     status: 200,
-    description: 'Les Users sont retrouvés',
-  })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
-  @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiOperation({
-    operationId: 'GetAllUsersDepartementMember',
-  })
-  @Get('members')
-  findAllMember(
-    //@Query('search') search: string,
-    @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
-    @Req() request,
-  ) {
-    return this.usersService.findAllDepartementMember(request.user.id);
-  }
-
-  @ApiCreatedResponse({ description: 'Chercher un Users' })
-  @ApiResponse({
-    status: 200,
-    description: 'Le Users est trouvé',
+    description: 'Le Folders est trouvé',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found, le id est introuvable' })
   @ApiResponse({ status: 500, description: 'Server Error' })
   @ApiOperation({
-    operationId: 'GetOneUsers',
+    operationId: 'GetOneFolders',
   })
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+    return this.foldersService.findOne(id);
   }
 
-  @ApiCreatedResponse({ description: 'Modification de Users' })
+  @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({
     status: 200,
-    description: 'Users est modifié',
+    description: 'Folders est modifié',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiBody({ type: UpdateUsersDto })
+  @ApiBody({ type: UpdateFoldersDto })
   @ApiOperation({
-    operationId: 'UpdateUsers',
+    operationId: 'UpdateFolders',
     requestBody: {
       content: {
         'multipart/form-data': {
@@ -135,23 +164,21 @@ export class UsersController {
     },
   })
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateUsersDto, @Req() request) {
-    const user = request.user;
-    console.log('user', user);
-    return this.usersService.update(id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateFoldersDto) {
+    return this.foldersService.update(id, dto);
   }
 
-  @ApiCreatedResponse({ description: 'Modification de Users' })
+  @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({
     status: 200,
-    description: 'Users est modifié',
+    description: 'Folders est modifié',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiBody({ type: UpdateUsersDto })
+  @ApiBody({ type: FolderValidationDto })
   @ApiOperation({
-    operationId: 'changeUserRole',
+    operationId: 'UpdateFolders',
     requestBody: {
       content: {
         'multipart/form-data': {
@@ -170,32 +197,32 @@ export class UsersController {
       },
     },
   })
-  @Roles('ADMIN')
-  @Put(':id/roles')
-  changeRole(
+  @Put(':id/service_reseau')
+  updateFolder(
     @Param('id') id: string,
-    @Body() dto: UpdateUsersDto,
+    @Body() dto: FolderValidationDto,
     @Req() request,
   ) {
-    const user = request.user;
-    console.log('user', user);
-    return this.usersService.changeRole(id, dto);
+    return this.foldersService.folderValidationByServiceReseau(
+      id,
+      dto,
+      request.user.id,
+    );
   }
 
-  @ApiCreatedResponse({ description: 'Supprimer Users' })
+  @ApiCreatedResponse({ description: 'Supprimer Folders' })
   @ApiResponse({
     status: 200,
-    description: 'Le Users est suprimé',
+    description: 'Le Folders est suprimé',
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found, le id est introuvable' })
   @ApiResponse({ status: 500, description: 'Server Error' })
   @ApiOperation({
-    operationId: 'SoftDeleteUsers',
+    operationId: 'SoftDeleteFolders',
   })
   @Delete(':id')
-  @Roles('ADMIN')
   delete(@Param('id') id: string) {
-    return this.usersService.delete(id);
+    return this.foldersService.delete(id);
   }
 }

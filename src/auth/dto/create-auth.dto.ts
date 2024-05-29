@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsNotEmpty,
   Min,
+  IsBoolean,
 } from 'class-validator';
 
 export class LoginDto {
@@ -54,6 +55,15 @@ export class RegisterDto {
   @IsOptional()
   departementName: string;
 
+  @ApiProperty({
+    type: 'boolean',
+    name: 'isCreditAgricole',
+    description: 'la propriété isCreditAgricole de type string',
+    default: '',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isCreditAgricole: boolean;
 }
 
 export class updatePasswordDto {

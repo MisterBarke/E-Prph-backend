@@ -18,6 +18,7 @@ model Users {
   signatures     Signatures[] @relation("signatures")
   signateursRole     Signateurs[] @relation("signateurs")
   departement Departement[]  @relation("departement")
+  rejected Folders[]  @relation("rejet")
   folders Folders[]
   documents Documents[]
   isPasswordInit Boolean      @default(false)
@@ -43,6 +44,7 @@ model Departement {
   title      String
   chef       Users     @relation("departement", fields: [chefId], references: [id])
   chefId     String    @db.ObjectId
+  isCreditAgricole Boolean @default(false)
   folders Folders[]
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -52,7 +54,15 @@ model Folders {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
   title      String
   description       String
+  nom       String?
+  adress       String?
+  telephone       String?
+  email       String?
   isDefault Boolean @default(false)
+  isRejected Boolean @default(false)
+  rejected        Users     @relation("rejet", fields: [rejectedId], references: [id])
+  rejectedId     String    @db.ObjectId
+  isValidateBeforeSignature Boolean @default(false)
   createdBy        Users     @relation(fields: [createdById], references: [id])
   createdById     String    @db.ObjectId
   signateurs Signateurs[] @relation("documentssignateurs")
