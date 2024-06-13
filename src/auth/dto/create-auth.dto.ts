@@ -56,14 +56,44 @@ export class RegisterDto {
   departementName: string;
 
   @ApiProperty({
+    type: 'string',
+    name: 'post',
+    description: 'la propriété post de type string',
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  post: string;
+
+  @ApiProperty({
+    type: 'number',
+    name: 'signaturePosition',
+    description: 'la propriété signaturePosition de type number',
+    default: '',
+  })
+  @IsNumber()
+  @IsOptional()
+  signaturePosition: number;
+
+  @ApiProperty({
     type: 'boolean',
     name: 'isCreditAgricole',
-    description: 'la propriété isCreditAgricole de type string',
+    description: 'la propriété isCreditAgricole de type boolean',
     default: '',
   })
   @IsBoolean()
   @IsOptional()
   isCreditAgricole: boolean;
+
+  @ApiProperty({
+    type: 'boolean',
+    name: 'isServiceReseau',
+    description: 'la propriété isServiceReseau de type boolean',
+    default: '',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isServiceReseau: boolean;
 }
 
 export class updatePasswordDto {

@@ -62,11 +62,23 @@ export class FolderValidationDto {
   isValidate: boolean;
 }
 
+export class FolderSignatureDto {
+  @ApiProperty({
+    type: 'string',
+    name: 'description',
+    description: 'la propriété description de type string',
+    default: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+}
+
 export class CreateFoldersDto {
   @IsNotEmpty()
   files: FileDto[];
 
-  @IsNotEmpty()
+  @IsOptional()
   signateurs: string[];
 
   @ApiProperty({
@@ -96,6 +108,7 @@ export class CreateFoldersDto {
     default: 'lorem ipsum',
   })
   @IsString()
+  @IsOptional()
   nom: string;
 
   @ApiProperty({
@@ -105,6 +118,7 @@ export class CreateFoldersDto {
     default: 'lorem ipsum',
   })
   @IsString()
+  @IsOptional()
   adress: string;
 
   @ApiProperty({
@@ -114,6 +128,7 @@ export class CreateFoldersDto {
     default: 'lorem ipsum',
   })
   @IsString()
+  @IsOptional()
   telephone: string;
 
   @ApiProperty({
@@ -124,6 +139,7 @@ export class CreateFoldersDto {
   })
   @IsString()
   @IsEmail()
+  @IsOptional()
   email: string;
 }
 

@@ -72,6 +72,9 @@ export class AuthService {
       where: {
         email,
       },
+      include: {
+        departement: true,
+      },
     });
     return this.supabaseClient.auth
       .signInWithPassword({
@@ -122,7 +125,14 @@ export class AuthService {
   }
 
   async register(
-    { email, departementName, isCreditAgricole }: RegisterDto,
+    {
+      email,
+      departementName,
+      isCreditAgricole,
+      isServiceReseau,
+      post,
+      signaturePosition,
+    }: RegisterDto,
     role: Role = Role.MEMBER,
     supabaseId?: string,
   ) {
@@ -156,20 +166,20 @@ export class AuthService {
           },
         });
 
-        this.mailService.sendMail({
-          companyContry: 'Niger',
-          companyName: 'BAGRI',
-          email,
-          subject: 'Informations de connexions',
-          template: 'credential',
-          title:
-            'Bienvenue au Parapheur de BAGRI, Veuiller se connecter avec le mot de passe',
-          context: {
-            username: email.split('@')[0].split('.').join(' '),
-            companyName: 'BAGRI',
-            password,
-          },
-        });
+        // this.mailService.sendMail({
+        //   companyContry: 'Niger',
+        //   companyName: 'BAGRI',
+        //   email,
+        //   subject: 'Informations de connexions',
+        //   template: 'credential',
+        //   title:
+        //     'Bienvenue au Parapheur de BAGRI, Veuiller se connecter avec le mot de passe',
+        //   context: {
+        //     username: email.split('@')[0].split('.').join(' '),
+        //     companyName: 'BAGRI',
+        //     password,
+        //   },
+        // });
 
         //Create departement when create a departement admin member
         if (role == Role.ADMIN_MEMBER) {
@@ -177,9 +187,22 @@ export class AuthService {
             data: {
               title: departementName,
               isCreditAgricole: isCreditAgricole ?? false,
-              chef: {
+              isServiceReseau: isServiceReseau ?? false,
+              users: {
                 connect: {
                   id: newUser.id,
+                },
+              },
+            },
+          });
+          await this.prisma.users.update({
+            where: {
+              id: newUser.id,
+            },
+            data: {
+              departement: {
+                connect: {
+                  id: departement.id,
                 },
               },
             },
@@ -202,9 +225,11 @@ export class AuthService {
             },
             data: {
               isSignateurDossierAgricole: isCreditAgricole ? true : false,
+              signaturePosition: signaturePosition ?? 0,
+              post,
               departement: {
                 connect: {
-                  id: connectedUser.id,
+                  id: connectedUser.departement.id,
                 },
               },
             },
@@ -214,9 +239,6 @@ export class AuthService {
         }
 
         return newUser;
-      })
-      .catch((err) => {
-        throw new UnauthorizedException();
       });
   }
 }

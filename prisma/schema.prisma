@@ -13,12 +13,16 @@ model Users {
   supabase_id    String       @unique
   phone          String
   matricule      String?
+  post      String?
   userSignatureUrl String?
   isSignateurDossierAgricole Boolean @default(false)
+  signaturePosition Int?
   role           Role
   signatures     Signatures[] @relation("signatures")
   signateursRole     Signateurs[] @relation("signateurs")
-  departement Departement[]  @relation("departement")
+  // departementChef Departement[]  @relation("departementChefRelation")
+  departement Departement?     @relation("departements", fields: [departementId], references: [id])
+  departementId     String?    @db.ObjectId
   rejected Folders[]  @relation("rejet")
   folders Folders[]
   documents Documents[]
@@ -43,10 +47,13 @@ model Documents {
 model Departement {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
   title      String
-  chef       Users     @relation("departement", fields: [chefId], references: [id])
-  chefId     String    @db.ObjectId
+  // chefDepartement       Users     @relation("departementChefRelation", fields: [chefDepartementId], references: [id])
+  // chefDepartementId     String    @db.ObjectId
+  users Users[]  @relation("departements")
   isCreditAgricole Boolean @default(false)
+  isServiceReseau Boolean @default(false)
   folders Folders[]
+  isDefault Boolean @default(false)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 }
@@ -92,6 +99,7 @@ model Signatures {
   userId     String    @db.ObjectId
   folder   Folders @relation("signer", fields: [folderId], references: [id])
   folderId String    @db.ObjectId
+  description String
   signedAt   DateTime
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt

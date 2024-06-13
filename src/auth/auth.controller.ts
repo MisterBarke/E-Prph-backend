@@ -62,6 +62,7 @@ export class AuthController {
 
   @Post('refresh')
   @ApiBearerAuth()
+  @Public()
   refreshToken(@Body() data: RefreshTokenDto) {
     return this.authService.retreiveNewSession(data);
   }

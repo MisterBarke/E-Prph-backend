@@ -33,7 +33,7 @@ export class UploadService {
       where: {
         isDefault: true,
         departement: {
-          id: connectedUser.departement[0]?.id,
+          id: connectedUser.departement?.id,
         },
       },
       include: {
@@ -71,7 +71,7 @@ export class UploadService {
         });
       } else {
         //set file to default folder
-        const connectedUser = await this.prisma.users.findFirst({
+        const connectedUser: any = await this.prisma.users.findFirst({
           where: {
             supabase_id: supabaseId,
           },
@@ -79,12 +79,64 @@ export class UploadService {
             departement: true,
           },
         });
-        const defaultFolder = await this.prisma.folders.findFirst({
+        if (!connectedUser.departement?.id) {
+          let defaultDepartement = await this.prisma.departement.findFirst({
+            where: {
+              isDefault: true,
+            }
+          })
+          if (!defaultDepartement) {
+            defaultDepartement = await this.prisma.departement.create({
+              data: {
+                title: '',
+                isDefault: true,
+              },
+            });
+          }
+          await this.prisma.users.update({
+            where: {
+              id: connectedUser.id,
+            },
+            data: {
+              departement: {
+                connect: {
+                  id: defaultDepartement.id,
+                }
+              }
+            },
+          })
+          connectedUser['departement'] = [defaultDepartement];
+        }
+        let defaultFolder = await this.prisma.folders.findFirst({
           where: {
             isDefault: true,
-            departementId: connectedUser?.departement[0]?.id,
+            departementId: connectedUser?.departement?.id,
           },
         });
+        if (!defaultFolder) {
+          defaultFolder = await this.prisma.folders.create({
+            data: {
+              isDefault: true,
+              description: '',
+              title: '',
+              adress: '',
+              departement: {
+                connect: {
+                  id: connectedUser?.departement?.id,
+                },
+              },
+              email: '',
+              telephone: '',
+              nom: '',
+              createdBy: {
+                connect: {
+                  id: connectedUser?.id,
+                },
+              },
+            },
+          });
+        }
+
         const newDocument = await this.prisma.documents.create({
           data: {
             title: file.originalname,

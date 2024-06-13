@@ -99,9 +99,7 @@ export class UsersService {
     return await this.prisma.users.findMany({
       where: {
         departement: {
-          some: {
-            id: connectedUser.departement[0]?.id,
-          },
+          id: connectedUser.departement?.id,
         },
       },
     });

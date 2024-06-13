@@ -25,6 +25,7 @@ import {
   PaginationParams,
   FolderValidationDto,
   AssignSignateurDto,
+  FolderSignatureDto,
 } from './dto/folders.dto';
 
 @ApiTags('folders')
@@ -80,9 +81,21 @@ export class FoldersController {
   @Get('')
   findAll(
     //@Query('search') search: string,
-    @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
+    @Query()
+    {
+      decalage = 0,
+      limit = 20,
+      dateDebut,
+      dateFin,
+      isRejected,
+      isValidate,
+    }: PaginationParams,
+    @Req() request,
   ) {
-    return this.foldersService.findAll({ decalage, limit, dateDebut, dateFin });
+    return this.foldersService.findAll(
+      { decalage, limit, dateDebut, dateFin, isRejected, isValidate },
+      request.user.id,
+    );
   }
 
   @ApiCreatedResponse({ description: 'Tous les Folders' })
@@ -246,6 +259,44 @@ export class FoldersController {
       dto,
       request.user.id,
     );
+  }
+
+  @ApiCreatedResponse({ description: 'Modification de Folders' })
+  @ApiResponse({
+    status: 200,
+    description: 'Folders est modifié',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: FolderValidationDto })
+  @ApiOperation({
+    operationId: 'UpdateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Put(':id/sign')
+  signFolder(
+    @Param('id') id: string,
+    @Body() dto: FolderSignatureDto,
+    @Req() request,
+  ) {
+    return this.foldersService.signFolder(request.user.id, id, dto);
   }
 
   @ApiCreatedResponse({ description: 'Supprimer Folders' })
