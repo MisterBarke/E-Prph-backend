@@ -27,6 +27,7 @@ import {
   AssignSignateurDto,
   FolderSignatureDto,
 } from './dto/folders.dto';
+import { request } from 'http';
 
 @ApiTags('folders')
 @Controller('folders')
@@ -67,6 +68,7 @@ export class FoldersController {
     return this.foldersService.create(dto, request.user.id);
   }
 
+  //get all folders
   @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
@@ -98,6 +100,7 @@ export class FoldersController {
     );
   }
 
+  //get by service reseau
   @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
@@ -132,6 +135,44 @@ export class FoldersController {
     });
   }
 
+  //get by signatory
+
+  @ApiCreatedResponse({ description: 'Tous les Folders' })
+  @ApiResponse({
+    status: 200,
+    description: 'Les Folders sont retrouvés',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'GetAllFoldersSignatory',
+  })
+  @Get('signateurs')
+  findAllSignatory(
+    //@Query('search') search: string,
+    @Query()
+    {
+      decalage = 0,
+      limit = 20,
+      dateDebut,
+      dateFin,
+      isRejected,
+      isValidate,
+    }: PaginationParams,
+    @Req() request,
+  ) {
+    return this.foldersService.getFoldersBySignatory({
+      decalage,
+      limit,
+      dateDebut,
+      dateFin,
+      isRejected,
+      isValidate
+    }, request.user.id);
+  }
+
+  //get one folder
   @ApiCreatedResponse({ description: 'Chercher un Folders' })
   @ApiResponse({
     status: 200,
@@ -148,6 +189,7 @@ export class FoldersController {
     return this.foldersService.findOne(id);
   }
 
+  // edit folder
   @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({
     status: 200,

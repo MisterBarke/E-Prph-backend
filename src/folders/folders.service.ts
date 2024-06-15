@@ -144,6 +144,40 @@ export class FoldersService {
     });
   }
 
+  async getFoldersBySignatory({
+    limit,
+    decalage,
+    dateDebut,
+    dateFin,
+    isRejected = false,
+    isValidate = true,
+  }: PaginationParams, supabase_id: string) {
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        supabase_id,
+      },
+    });
+    if (connectedUser.isSignateurDossierAgricole == true) {
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+          departement: {
+            isCreditAgricole: true,
+          },
+          isValidateBeforeSignature: isValidate,
+          isRejected: isRejected,
+        },
+        include: {
+          documents: true,
+        },
+      });
+    }else{
+      return 'Vous n\'etes pas autorisé à voir ces informations';
+    }
+
+  }
+
   async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
     if (!dto?.signateurs || !dto?.signateurs?.length) return;
     const data = await this.prisma.folders.findMany({
@@ -171,7 +205,7 @@ export class FoldersService {
             },
           },
         },
-      });
+      }); 
     }
     return 'updated';
   }
