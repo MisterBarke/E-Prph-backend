@@ -182,8 +182,8 @@ export class FoldersService {
     if (!dto?.signateurs || !dto?.signateurs?.length) return;
     const data = await this.prisma.folders.findMany({
       where: {
-        id: {
-          in: dto.signateurs,
+            id: {
+                in: dto.signateurs,
         },
       },
     });
@@ -282,8 +282,8 @@ export class FoldersService {
       });
 
       let position = 0;
-      signateurs?.forEach((el) => {
-        if (el.signaturePosition > position) position = el.signaturePosition;
+        signateurs?.forEach((el) => {
+            if (el.signaturePosition > position) position = el.signaturePosition;
       });
       if (position != 0) {
         //Respect de l'ordre
@@ -352,7 +352,8 @@ export class FoldersService {
         description: dto.description,
         user: {
           connect: {
-            id: connectedUser.id,
+                id: connectedUser.id,
+                userSignatureUrl: connectedUser.userSignatureUrl
           },
         },
       },
