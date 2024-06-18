@@ -344,6 +344,7 @@ export class FoldersService {
       const signatures = await this.prisma.signatures.create({
           data: {
               signedAt: new Date(),
+              
               folder: {
                   connect: {
                       id: folderId,
@@ -354,7 +355,7 @@ export class FoldersService {
               user: {
                   connect: {
                       id: connectedUser.id,
-                      userSignatureUrl: connectedUser?.userSignatureUrl
+                      userSignatureUrl: connectedUser.userSignatureUrl
                   },
               },
           },
