@@ -341,22 +341,23 @@ export class FoldersService {
       },
     });
     if (signatureExistant) throw new HttpException('Document déjà signé', 400);
-    const signatures = await this.prisma.signatures.create({
-      data: {
-        signedAt: new Date(),
-        folder: {
-          connect: {
-            id: folderId,
+      const signatures = await this.prisma.signatures.create({
+          data: {
+              signedAt: new Date(),
+              folder: {
+                  connect: {
+                      id: folderId,
+                  },
+              },
+              
+              description: dto.description,
+              user: {
+                  connect: {
+                      id: connectedUser.id,
+                      userSignatureUrl: connectedUser.userSignatureUrl!
+                  },
+              },
           },
-        },
-        description: dto.description,
-        user: {
-          connect: {
-                id: connectedUser.id,
-                userSignatureUrl: connectedUser.userSignatureUrl
-          },
-        },
-      },
     });
     return signatures;
   }
