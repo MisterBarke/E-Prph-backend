@@ -354,7 +354,7 @@ export class FoldersService {
               user: {
                   connect: {
                       id: connectedUser.id,
-                      userSignatureUrl: connectedUser.userSignatureUrl!
+                      userSignatureUrl: connectedUser?.userSignatureUrl
                   },
               },
           },
