@@ -14,6 +14,7 @@ import {
   FolderSignatureDto,
 } from './dto/folders.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { log } from 'console';
 
 @Injectable()
 export class FoldersService {
@@ -190,7 +191,8 @@ export class FoldersService {
     if (users.length != dto.signateurs.length) {
       const ids = users.map((el) => el.id);
       const rest = dto.signateurs.filter((el) => !ids.includes(el));
-      throw new HttpException(`Id ${rest.join(' ||| ')} incorrects`, 400);
+      console.log(users, dto.signateurs);
+      throw new HttpException(`Id ${rest.join(' ||| ')} incorrects ${users}, ${dto.signateurs}`, 400,);
     }
     for (let i = 0; i < dto.signateurs.length; i++) {
       const element = dto.signateurs[i];
