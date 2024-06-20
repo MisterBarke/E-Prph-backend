@@ -181,36 +181,40 @@ export class FoldersService {
 
   async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
     if (!dto?.signateurs || !dto?.signateurs?.length) return;
-    const users = await this.prisma.users.findMany({
+    const users = await this.prisma.signateurs.findMany({
       where: {
-            id: {
-                in: dto.signateurs,
-        },
+            user: {
+              id: {
+                in: dto.signateurs
+              }
+            }
       },
     });
- /*    if (users.length != dto.signateurs.length) {
-      const ids = users.map((el) => el.id);
-      const rest = dto.signateurs.filter((el) => !ids.includes(el));
-      throw new HttpException(`Id ${rest.join(' ||| ')} incorrects ${users}, ${dto.signateurs}`, 400,);
-    } */
-    for (let i = 0; i < dto.signateurs.length; i++) {
-      const element = dto.signateurs[i];
+    
+   /*  if (users.length !== dto.signateurs.length) {
+      const existingIds = users.map((user) => user.id);
+      const nonExistingIds = dto.signateurs.filter((id) => !existingIds.includes(id));
+      throw new HttpException(`Id ${nonExistingIds.join(' ||| ')} incorrects`, 400);
+    }
+   */
+      
+    try {
       await this.prisma.folders.update({
-        where: {
-          id,
-        },
-        
+        where: { id },
         data: {
           signateurs: {
-            connect: {
-              id: element,
-            },
+            connect: users.map((signateurId) => ({ id: signateurId.id })),
           },
         },
-      }); 
+      });
+      return 'updated';
+    } catch (error) {
+      console.error(error);
+      throw new HttpException('Failed to update folder with signateurs', 500);
     }
-    return 'updated';
+    
   }
+
 
   async folderValidationByServiceReseau(
     id: string,
