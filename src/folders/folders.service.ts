@@ -180,15 +180,15 @@ export class FoldersService {
 
   async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
     if (!dto?.signateurs || !dto?.signateurs?.length) return;
-    const data = await this.prisma.folders.findMany({
+    const users = await this.prisma.users.findMany({
       where: {
             id: {
                 in: dto.signateurs,
         },
       },
     });
-    if (data.length != dto.signateurs.length) {
-      const ids = data.map((el) => el.id);
+    if (users.length != dto.signateurs.length) {
+      const ids = users.map((el) => el.id);
       const rest = dto.signateurs.filter((el) => !ids.includes(el));
       throw new HttpException(`Id ${rest.join(' ||| ')} incorrects`, 400);
     }
@@ -198,6 +198,7 @@ export class FoldersService {
         where: {
           id,
         },
+        
         data: {
           signateurs: {
             connect: {
