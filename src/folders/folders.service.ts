@@ -188,12 +188,11 @@ export class FoldersService {
         },
       },
     });
-    if (users.length != dto.signateurs.length) {
+ /*    if (users.length != dto.signateurs.length) {
       const ids = users.map((el) => el.id);
       const rest = dto.signateurs.filter((el) => !ids.includes(el));
-      console.log(users, dto.signateurs);
       throw new HttpException(`Id ${rest.join(' ||| ')} incorrects ${users}, ${dto.signateurs}`, 400,);
-    }
+    } */
     for (let i = 0; i < dto.signateurs.length; i++) {
       const element = dto.signateurs[i];
       await this.prisma.folders.update({
