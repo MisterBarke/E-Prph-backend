@@ -9,7 +9,7 @@ async function main() {
   const sudoUser = await prisma.users.create({
     data: {
       email: 'softart@test.com',
-      supabase_id: '456tggtyeehgghpoiujh5678i',
+      supabase_id: 'c58b8d36-59cd-4425-8f53-94a57bee3387',
       phone: '1234567890',
       role: 'SUDO',
       isPasswordInit: true,
