@@ -1,21 +1,42 @@
 import { PrismaClient } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
 
 // initialize Prisma Client
 const prisma = new PrismaClient();
 
-async function main() {
+// Supabase configuration
+const supabaseUrl = process.env.SUPERBASE_PROJECT_URL;
+const supabaseKey = process.env.SUPERBASE_API_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Create a sudo user
+async function main() {
+  const email = 'companysoftart@gmail.com';
+  const password = '123456'; // Assurez-vous d'utiliser un mot de passe sécurisé
+  const phone = '1234567890';
+
+  // Create user in Supabase
+  const { data: supabaseUser, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    console.error('Error creating user in Supabase:', error.message);
+    return;
+  }
+
+  // Create a sudo user in MongoDB
   const sudoUser = await prisma.users.create({
     data: {
-      email: 'softart@test.com',
-      supabase_id: 'c58b8d36-59cd-4425-8f53-94a57bee3387',
-      phone: '1234567890',
-      role: 'SUDO',
+      email,
+      supabase_id: supabaseUser?.user?.id,
+      phone,
+      role: 'SUDO', 
       isPasswordInit: true,
       // Add other fields if necessary
     },
   });
+
   console.log('Sudo user created:', sudoUser);
 }
 
@@ -26,7 +47,6 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-   console.log('sudo created');
-   
+    console.log('sudo created');
     await prisma.$disconnect();
   });

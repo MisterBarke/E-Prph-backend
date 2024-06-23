@@ -83,6 +83,9 @@ export class AuthService {
         password,
       })
       .then(async (value) => {
+        console.log(value.data);
+        console.log(value.error);
+        
         const { session, user } = value.data;
         if (value.error)
           if (value.error?.message == 'Email not confirmed') {
@@ -112,6 +115,7 @@ export class AuthService {
         throw new UnauthorizedException();
       });
   }
+  
 
   generatePassword() {
     const alphabets = 'AZERTYUIOPMLKJHGFDSQWXCVBN'.split('');
