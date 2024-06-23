@@ -76,6 +76,7 @@ export class AuthService {
         departement: true,
       },
     });
+    console.log(informationUser);
     return this.supabaseClient.auth
       .signInWithPassword({
         email,

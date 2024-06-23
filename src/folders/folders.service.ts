@@ -197,7 +197,6 @@ export class FoldersService {
       throw new HttpException(`Id ${nonExistingIds.join(' ||| ')} incorrects`, 400);
     }
    */
-      
     try {
       await this.prisma.folders.update({
         where: { id },

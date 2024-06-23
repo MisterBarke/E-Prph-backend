@@ -15,7 +15,7 @@ export class LoginDto {
     type: 'string',
     name: 'email',
     description: 'la propriété email de type string',
-    default: 'john@doe.test',
+    default: 'softart@test.com',
   })
   @IsString()
   @IsEmail()
@@ -26,7 +26,7 @@ export class LoginDto {
     type: 'string',
     name: 'password',
     description: 'la propriété password de type string',
-    default: 'pl90BGDkd76NY',
+    default: '123456',
   })
   @IsString()
   @IsNotEmpty()
@@ -38,7 +38,7 @@ export class RegisterDto {
     type: 'string',
     name: 'email',
     description: 'la propriété email de type string',
-    default: 'john@doe.test',
+    default: 'softart@test.com',
   })
   @IsString()
   @IsEmail()
