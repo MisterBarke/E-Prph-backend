@@ -45,7 +45,7 @@ export class UsersController {
   @Get('')
   findAll(
     //@Query('search') search: string,
-    @Query() { decalage = 0, limit = 20, dateDebut, dateFin }: PaginationParams,
+    @Query() { decalage = 0, limit = 50, dateDebut, dateFin }: PaginationParams,
   ) {
     return this.usersService.findAll({ decalage, limit, dateDebut, dateFin });
   }
