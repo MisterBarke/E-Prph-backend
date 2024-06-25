@@ -36,8 +36,6 @@ export class AuthService {
     );
   }
 
-
-
   async retreiveNewSession({ refresh_token }: RefreshTokenDto) {
     return this.supabaseClient.auth
       .refreshSession({

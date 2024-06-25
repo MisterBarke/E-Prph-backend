@@ -181,39 +181,61 @@ export class FoldersService {
 
   async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
     if (!dto?.signateurs || !dto?.signateurs?.length) return;
-    const users = await this.prisma.signateurs.findMany({
+  
+    const users = await this.prisma.users.findMany({
       where: {
-            user: {
-              id: {
-                in: dto.signateurs
-              }
-            }
+        id: {
+          in: dto.signateurs,
+        },
       },
     });
-    
-   /*  if (users.length !== dto.signateurs.length) {
+  
+    if (users.length !== dto.signateurs.length) {
       const existingIds = users.map((user) => user.id);
       const nonExistingIds = dto.signateurs.filter((id) => !existingIds.includes(id));
       throw new HttpException(`Id ${nonExistingIds.join(' ||| ')} incorrects`, 400);
     }
-   */
+  
+    const signateurs = await Promise.all(
+      users.map(async (user) => {
+        let signateur = await this.prisma.signateurs.findUnique({
+          where: { id: user.id },
+        });
+  
+        if (!signateur) {
+          signateur = await this.prisma.signateurs.create({
+            data: {
+              userId: user.id,
+              folderId: id, 
+            },
+          });
+        }
+  
+        return signateur;
+      })
+    );
+  
     try {
+      const ids = signateurs.map((signateur) => ({ id: signateur.id }));
       await this.prisma.folders.update({
         where: { id },
         data: {
           signateurs: {
-            connect: users.map((signateurId) => ({ id: signateurId.id })),
+            connect: ids,
           },
         },
       });
+  
       return 'updated';
     } catch (error) {
       console.error(error);
-      throw new HttpException('Failed to update folder with signateurs', 500);
+      if (error.code === 'P2018') {
+        throw new HttpException('Failed to update folder with signateurs: connected records not found', 500);
+      } else {
+        throw new HttpException('Failed to update folder with signateurs', 500);
+      }
     }
-    
   }
-
 
   async folderValidationByServiceReseau(
     id: string,
