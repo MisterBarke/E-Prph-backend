@@ -1,52 +1,81 @@
-import { PrismaClient } from '@prisma/client';
-import { createClient } from '@supabase/supabase-js';
+import { PrismaClient, Role } from '@prisma/client';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { ConfigService } from '@nestjs/config';
+import * as dotenv from 'dotenv';
 
-// initialize Prisma Client
+dotenv.config();
+
+
 const prisma = new PrismaClient();
 
-// Supabase configuration
 const supabaseUrl = process.env.SUPERBASE_PROJECT_URL;
 const supabaseKey = process.env.SUPERBASE_API_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Supabase URL and API Key must be provided.');
+}
+
+const supabaseClient: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+  },
+}) 
+console.log('client '+supabaseClient.auth.getSession);
+
+async function generatePassword(): Promise<string> {
+  return `123456`; // Remplacer par une génération plus sécurisée en production
+}
 
 async function main() {
   const email = 'companysoftart@gmail.com';
-  const password = '123456'; // Assurez-vous d'utiliser un mot de passe sécurisé
-  const phone = '1234567890';
+  const post = 'Developer';
+  const role: Role = Role.SUDO;
 
-  // Create user in Supabase
-  const { data: supabaseUser, error } = await supabase.auth.signUp({
-    email,
-    password,
+
+  const password = await generatePassword();
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email : email,
+    password: password
   });
+console.log('data  '+data.user);
 
   if (error) {
-    console.error('Error creating user in Supabase:', error.message);
-    return;
+    throw new Error(`Error during sign up: ${error.code, error.status}`);
   }
 
-  // Create a sudo user in MongoDB
-  const sudoUser = await prisma.users.create({
+  const { user } = data;
+
+  const newUser = await prisma.users.create({
     data: {
       email,
-      supabase_id: supabaseUser?.user?.id,
-      phone,
-      role: 'SUDO', 
-      isPasswordInit: true,
-      // Add other fields if necessary
+      supabase_id: user.id,
+      phone: user.phone ?? '',
+      role,
+      createdAt: new Date(user.created_at),
     },
   });
 
-  console.log('Sudo user created:', sudoUser);
+ await prisma.users.findUnique({
+    where: { supabase_id: user.id }
+  });
+
+  const updatedUser = await prisma.users.update({
+    where: { id: newUser.id },
+    data: {
+      isSignateurDossierAgricole: false,
+      post
+    },
+  });
+
+  console.log('User created:', updatedUser);
 }
 
-// execute the main function
 main()
   .catch((e) => {
     console.error(e);
     process.exit(1);
   })
   .finally(async () => {
-    console.log('sudo created');
     await prisma.$disconnect();
   });

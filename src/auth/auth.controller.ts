@@ -32,7 +32,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @Roles('SUDO')
+  //@Roles('SUDO')
   @Post('register/admin/by_super_admin')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto, Role.ADMIN);

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   Injectable,
   InternalServerErrorException,
@@ -34,6 +35,9 @@ export class AuthService {
       },
     );
   }
+
+
+
   async retreiveNewSession({ refresh_token }: RefreshTokenDto) {
     return this.supabaseClient.auth
       .refreshSession({
@@ -76,16 +80,12 @@ export class AuthService {
         departement: true,
       },
     });
-    console.log(informationUser);
     return this.supabaseClient.auth
       .signInWithPassword({
         email,
         password,
       })
       .then(async (value) => {
-        console.log(value.data);
-        console.log(value.error);
-        
         const { session, user } = value.data;
         if (value.error)
           if (value.error?.message == 'Email not confirmed') {
@@ -146,30 +146,97 @@ export class AuthService {
         email,
       },
     });
+  
+    
     if (retreiveUser) throw new HttpException('User already exist', 409);
 
     const password = this.generatePassword();
+   
     return this.supabaseClient.auth
       .signUp({
         email,
         password,
       })
       .then(async (value) => {
+
         if (value.error?.status) {
           throw new HttpException(value.error.message, value.error.status);
         }
         const { session, user } = value.data;
         const { created_at, email, id, phone, user_metadata } = user;
+        console.log(user);
 
-        const newUser = await this.prisma.users.create({
-          data: {
-            email,
-            supabase_id: id,
-            phone,
-            role,
-            createdAt: created_at,
+   const newUser = await this.prisma.users.create({
+    data: {
+      email,
+      supabase_id: id,
+      phone,
+      role,
+      createdAt: created_at,
+    },
+  });
+
+  
+
+  if (role == Role.ADMIN_MEMBER) {
+    
+    const departement = await this.prisma.departement.create({
+      data: {
+        title: departementName,
+        isCreditAgricole: isCreditAgricole ?? false,
+        isServiceReseau: isServiceReseau ?? false,
+        users: {
+          connect: {
+            id: newUser.id,
           },
-        });
+        },
+      },
+    });
+    
+    await this.prisma.users.update({
+      where: {
+        id: newUser.id,
+      },
+      data: {
+        departement: {
+          connect: {
+            id: departement.id,
+          },
+        },
+      },
+    });
+    return { user: newUser, departement };
+  }
+
+  if (role == Role.MEMBER) {
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        supabase_id: supabaseId!,
+      },
+      include: {
+        departement: true,
+      },
+    });
+    const updatedUser = await this.prisma.users.update({
+      where: {
+        id: newUser.id,
+      },
+      data: {
+        isSignateurDossierAgricole: isCreditAgricole ? true : false,
+        signaturePosition: signaturePosition ?? 0,
+        post,
+        departement: {
+          connect: {
+            id: connectedUser.departement.id,
+          },
+        },
+      },
+    });
+
+    return { user: updatedUser, departement: connectedUser.departement };
+  }
+  return newUser;
+        
 
         // this.mailService.sendMail({
         //   companyContry: 'Niger',
@@ -187,63 +254,7 @@ export class AuthService {
         // });
 
         //Create departement when create a departement admin member
-        if (role == Role.ADMIN_MEMBER) {
-          const departement = await this.prisma.departement.create({
-            data: {
-              title: departementName,
-              isCreditAgricole: isCreditAgricole ?? false,
-              isServiceReseau: isServiceReseau ?? false,
-              users: {
-                connect: {
-                  id: newUser.id,
-                },
-              },
-            },
-          });
-          await this.prisma.users.update({
-            where: {
-              id: newUser.id,
-            },
-            data: {
-              departement: {
-                connect: {
-                  id: departement.id,
-                },
-              },
-            },
-          });
-          return { user: newUser, departement };
-        }
-
-        if (role == Role.MEMBER) {
-          const connectedUser = await this.prisma.users.findUnique({
-            where: {
-              supabase_id: supabaseId!,
-            },
-            include: {
-              departement: true,
-            },
-          });
-          const updatedUser = await this.prisma.users.update({
-            where: {
-              id: newUser.id,
-            },
-            data: {
-              isSignateurDossierAgricole: isCreditAgricole ? true : false,
-              signaturePosition: signaturePosition ?? 0,
-              post,
-              departement: {
-                connect: {
-                  id: connectedUser.departement.id,
-                },
-              },
-            },
-          });
-
-          return { user: updatedUser, departement: connectedUser.departement };
-        }
-
-        return newUser;
+      
       });
   }
 }
