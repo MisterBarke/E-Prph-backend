@@ -20,14 +20,14 @@ const supabaseClient: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
     persistSession: false,
   },
 }) 
-console.log('client '+supabaseClient.auth.getSession);
+
 
 async function generatePassword(): Promise<string> {
   return `123456`; // Remplacer par une génération plus sécurisée en production
 }
 
 async function main() {
-  const email = 'companysoftart@gmail.com';
+  const email = 'superadmin@gmail.com';
   const post = 'Developer';
   const role: Role = Role.SUDO;
 
