@@ -3,6 +3,7 @@ import {
   NotFoundException,
   Post,
   ConflictException,
+  HttpException,
 } from '@nestjs/common';
 import {
   CreateUsersDto,
@@ -63,6 +64,7 @@ export class UsersService {
         supabase_id: dto.supabase_id,
         phone: dto.phone,
         role: dto.role,
+        post: dto.post
       },
     });
     return newData;

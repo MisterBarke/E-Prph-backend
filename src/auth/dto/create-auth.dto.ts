@@ -57,13 +57,13 @@ export class RegisterDto {
 
   @ApiProperty({
     type: 'string',
-    name: 'post',
-    description: 'la propriété post de type string',
+    name: 'name',
+    description: 'la propriété name de type string',
     default: '',
   })
   @IsString()
   @IsOptional()
-  post: string;
+  name: string;
 
   @ApiProperty({
     type: 'number',

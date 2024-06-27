@@ -274,120 +274,69 @@ export class FoldersService {
     folderId: string,
     dto: FolderSignatureDto,
   ) {
-    //Qui va signer avant qui l'ordre du tableau
+    // Find the connected user based on supabase_id
     const connectedUser = await this.prisma.users.findUnique({
-      where: {
-        supabase_id,
-      },
+      where: { supabase_id },
     });
-
+    if (!connectedUser) throw new HttpException('Utilisateur non trouvé', 400);
+  
     const folder = await this.prisma.folders.findUnique({
-      where: {
-        id: folderId,
-      },
+      where: { id: folderId },
       include: {
         signateurs: {
-          include: {
-            user: true,
-          },
+          include: { user: true },
         },
         departement: true,
         signatures: {
-          include: {
-            user: true,
-          },
+          include: { user: true },
         },
       },
     });
-
-    if (!folder) throw new HttpException('le Dossier est incorrect', 400);
-
-    if (folder.departement.isCreditAgricole) {
-      //Retreive Signateurs
-      const signateurs = await this.prisma.users.findMany({
-        where: { isSignateurDossierAgricole: true },
-      });
-
-      let position = 0;
-        signateurs?.forEach((el) => {
-            if (el.signaturePosition > position) position = el.signaturePosition;
-      });
-      if (position != 0) {
-        //Respect de l'ordre
-        const sortedSignateurs = signateurs?.sort((a, b) =>
-          a.signaturePosition > b.signaturePosition ? 1 : -1,
-        );
-        const normalSignateur =
-          sortedSignateurs[
-            sortedSignateurs.findIndex(
-              (el) => el.signaturePosition == position,
-            ) + 1
-          ];
-        if (normalSignateur.id != connectedUser.id)
-          throw new HttpException(
-            `Respecter ordre de signateur ${normalSignateur.email} avant`,
-            400,
-          );
-      }
-    } else {
-      let isSignateurThisFolder = false;
-      folder.signateurs?.forEach((sign) => {
-        if (sign.userId == connectedUser.id) isSignateurThisFolder = true;
-      });
-
-      if (!isSignateurThisFolder)
-        throw new HttpException('Signature refuser', 400);
-      let position = 0;
-      folder.signatures?.forEach((el) => {
-        if (el.user.signaturePosition > position)
-          position = el.user.signaturePosition;
-      });
-      if (position != 0) {
-        //Respect de l'ordre
-        const sortedSignateurs = folder.signateurs?.sort((a, b) =>
-          a.user.signaturePosition > b.user.signaturePosition ? 1 : -1,
-        );
-        const normalSignateur =
-          sortedSignateurs[
-            sortedSignateurs.findIndex(
-              (el) => el.user.signaturePosition == position,
-            ) + 1
-          ];
-        if (normalSignateur.userId != connectedUser.id)
-          throw new HttpException(
-            `Respecter ordre de signateur ${normalSignateur.user.email} avant`,
-            400,
-          );
-      }
+    if (!folder) throw new HttpException('Le dossier est incorrect', 400);
+  
+ 
+    const nextSignateur = folder.signateurs[0];
+    if (nextSignateur.userId !== connectedUser.id) {
+      throw new HttpException(
+        `Respecter ordre de signature, ${nextSignateur.user.post} doit d'abord signer`,
+        400
+      );
     }
+  
 
     const signatureExistant = await this.prisma.signatures.findFirst({
-      where: {
-        folderId,
-        userId: connectedUser.id,
-      },
+      where: { folderId, userId: connectedUser.id },
     });
     if (signatureExistant) throw new HttpException('Document déjà signé', 400);
-      const signatures = await this.prisma.signatures.create({
-          data: {
-              signedAt: new Date(),
-              
-              folder: {
-                  connect: {
-                      id: folderId,
-                  },
-              },
-              
-              description: dto.description,
-              user: {
-                  connect: {
-                      id: connectedUser.id,
-                  },
-              },
-          },
+  
+    const signature = await this.prisma.signatures.create({
+      data: {
+        signedAt: new Date(),
+        folder: { connect: { id: folderId } },
+        description: dto.description,
+        user: { connect: { id: connectedUser.id } },
+      },
     });
-    return signatures;
+  
+
+    const updatedSignateurs = folder.signateurs
+    .filter(signateur => signateur.userId !== nextSignateur.userId)
+    .concat(nextSignateur);
+    console.log(updatedSignateurs);
+    
+  
+  await this.prisma.folders.update({
+    where: { id: folderId },
+    data: {
+      signateurs: {
+        set: updatedSignateurs.map(signateur => ({ id: signateur.id })),
+      },
+    },
+  })
+  
+    return signature;
   }
+  
 
   async findOne(id: string) {
     return await this.prisma.folders.findUnique({

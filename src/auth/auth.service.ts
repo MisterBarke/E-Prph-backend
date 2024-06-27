@@ -133,7 +133,7 @@ export class AuthService {
       departementName,
       isCreditAgricole,
       isServiceReseau,
-      post,
+      name,
       signaturePosition,
     }: RegisterDto,
     role: Role = Role.MEMBER,
@@ -222,7 +222,7 @@ export class AuthService {
       data: {
         isSignateurDossierAgricole: isCreditAgricole ? true : false,
         signaturePosition: signaturePosition ?? 0,
-        post,
+        name,
         departement: {
           connect: {
             id: connectedUser.departement.id,

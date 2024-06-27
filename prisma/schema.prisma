@@ -13,7 +13,8 @@ model Users {
   supabase_id    String       @unique
   phone          String
   matricule      String?
-  post      String?
+  post           String?
+  name           String?   
   userSignatureUrl String?
   isSignateurDossierAgricole Boolean @default(false)
   signaturePosition Int?

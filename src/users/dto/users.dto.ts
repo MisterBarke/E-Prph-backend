@@ -46,6 +46,16 @@ export class CreateUsersDto {
   phone: string;
 
   @ApiProperty({
+    type: 'string',
+    name: 'post',
+    description: 'la propriété post de type string',
+    default: '',
+  })
+  @IsString()
+  @IsNotEmpty()
+  post: string;
+
+  @ApiProperty({
     type: 'Role',
     name: 'role',
     description: 'la propriété role de type Role',
