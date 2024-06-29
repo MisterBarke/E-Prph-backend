@@ -293,22 +293,38 @@ export class FoldersService {
       },
     });
     if (!folder) throw new HttpException('Le dossier est incorrect', 400);
+
+    const signaturePosition = folder.signaturePosition;
   
- 
-    const nextSignateur = folder.signateurs[0];
+    const userSignateur = folder.signateurs.find(signateur => signateur.userId === connectedUser.id);
+    if (!userSignateur) {
+      throw new HttpException('Vous n\'etes pas autorisé à signer ce dossier', 400);
+    }
+  
+    const nextSignateur = folder.signateurs[signaturePosition];
     if (nextSignateur.userId !== connectedUser.id) {
       throw new HttpException(
         `Respecter ordre de signature, ${nextSignateur.user.post} doit d'abord signer`,
         400
       );
     }
-  
 
     const signatureExistant = await this.prisma.signatures.findFirst({
       where: { folderId, userId: connectedUser.id },
     });
     if (signatureExistant) throw new HttpException('Document déjà signé', 400);
-  
+
+    await this.prisma.signateurs.update({
+      where: { id: userSignateur.id },
+      data: { hasSigned: true },
+    });
+    
+    await this.prisma.folders.update({
+      where:{id: folderId},
+      data:{
+        signaturePosition: signaturePosition+1
+      }
+    })
     const signature = await this.prisma.signatures.create({
       data: {
         signedAt: new Date(),
@@ -317,23 +333,7 @@ export class FoldersService {
         user: { connect: { id: connectedUser.id } },
       },
     });
-  
 
-    const updatedSignateurs = folder.signateurs
-    .filter(signateur => signateur.userId !== nextSignateur.userId)
-    .concat(nextSignateur);
-    console.log(updatedSignateurs);
-    
-  
-  await this.prisma.folders.update({
-    where: { id: folderId },
-    data: {
-      signateurs: {
-        set: updatedSignateurs.map(signateur => ({ id: signateur.id })),
-      },
-    },
-  })
-  
     return signature;
   }
   

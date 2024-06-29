@@ -17,7 +17,6 @@ model Users {
   name           String?   
   userSignatureUrl String?
   isSignateurDossierAgricole Boolean @default(false)
-  signaturePosition Int?
   role           Role
   signatures     Signatures[] @relation("signatures")
   signateursRole     Signateurs[] @relation("signateurs")
@@ -81,6 +80,7 @@ model Folders {
   departementId     String    @db.ObjectId
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
+  signaturePosition Int @default(0)
 }
 
 //Definis les signateurs pour un dossier
@@ -92,6 +92,7 @@ model Signateurs {
   folderId String    @db.ObjectId
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  hasSigned Boolean @default(false)
 }
 
 model Signatures {

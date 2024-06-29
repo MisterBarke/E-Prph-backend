@@ -221,7 +221,6 @@ export class AuthService {
       },
       data: {
         isSignateurDossierAgricole: isCreditAgricole ? true : false,
-        signaturePosition: signaturePosition ?? 0,
         name,
         departement: {
           connect: {
