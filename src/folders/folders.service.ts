@@ -49,6 +49,7 @@ export class FoldersService {
         departement: {
           connect: {
             id: connectedUser.departement.id,
+            title: connectedUser.departement.title
           },
         },
       },
