@@ -144,7 +144,6 @@ export class UsersController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateUsersDto, @Req() request) {
     const user = request.user;
-    console.log('user', user);
     return this.usersService.update(id, dto);
   }
 

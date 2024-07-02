@@ -69,6 +69,7 @@ export class AuthService {
       });
   }
 
+  
   async login({ email, password }: LoginDto) {
     const informationUser = await this.prisma.users.findUnique({
       where: {

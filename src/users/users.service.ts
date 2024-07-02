@@ -64,7 +64,6 @@ export class UsersService {
         supabase_id: dto.supabase_id,
         phone: dto.phone,
         role: dto.role,
-        post: dto.post
       },
     });
     return newData;
@@ -132,6 +131,8 @@ export class UsersService {
       data: {
         email: dto.email ?? data.email,
         phone: dto.phone ?? data.phone,
+        name: dto.name ?? data.name,
+        matricule: dto.matricule?? data.matricule
       },
     });
   }

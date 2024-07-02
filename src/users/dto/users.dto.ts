@@ -47,13 +47,23 @@ export class CreateUsersDto {
 
   @ApiProperty({
     type: 'string',
-    name: 'post',
-    description: 'la propriété post de type string',
-    default: '',
+    name: 'name',
+    description: 'la propriété name de type string',
+    default: 'lorem ipsum',
   })
   @IsString()
   @IsNotEmpty()
-  post: string;
+  name: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'matricule',
+    description: 'la propriété matricule de type string',
+    default: 'lorem ipsum',
+  })
+  @IsString()
+  @IsNotEmpty()
+  matricule: string;
 
   @ApiProperty({
     type: 'Role',

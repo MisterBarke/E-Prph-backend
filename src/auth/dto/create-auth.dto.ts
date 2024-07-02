@@ -57,13 +57,23 @@ export class RegisterDto {
 
   @ApiProperty({
     type: 'string',
-    name: 'name',
-    description: 'la propriété name de type string',
+    name: 'position',
+    description: 'la propriété position de type string',
     default: '',
   })
   @IsString()
   @IsOptional()
-  name: string;
+  position: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'matricule',
+    description: 'la propriété matricule de type string',
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  matricule: string;
 
   @ApiProperty({
     type: 'number',
