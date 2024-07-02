@@ -28,7 +28,7 @@ async function generatePassword(): Promise<string> {
 
 async function main() {
   const email = 'superadmin@gmail.com';
-  const post = 'Developer';
+  const position = 'Developer';
   const role: Role = Role.SUDO;
 
 
@@ -64,7 +64,7 @@ console.log('data  '+data.user);
     where: { id: newUser.id },
     data: {
       isSignateurDossierAgricole: false,
-      post
+      position
     },
   });
 
