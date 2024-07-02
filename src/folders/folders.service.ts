@@ -305,7 +305,7 @@ export class FoldersService {
     const nextSignateur = folder.signateurs[signaturePosition];
     if (nextSignateur.userId !== connectedUser.id) {
       throw new HttpException(
-        `Respecter ordre de signature, ${nextSignateur.user.post} doit d'abord signer`,
+        `Respecter ordre de signature, ${nextSignateur.user.position} doit d'abord signer`,
         400
       );
     }
