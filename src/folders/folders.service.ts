@@ -160,7 +160,7 @@ export class FoldersService {
       },
     });
     if (connectedUser.isSignateurDossierAgricole == true) {
-      return await this.prisma.folders.findMany({
+     return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where: {
@@ -172,12 +172,19 @@ export class FoldersService {
         },
         include: {
           documents: true,
+          signateurs:{
+            include:{
+              user: true
+            }
+            
+          },
         },
       });
+      
+      
     }else{
       return 'Vous n\'etes pas autorisé à voir ces informations';
     }
-
   }
 
   async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
@@ -216,8 +223,12 @@ export class FoldersService {
       })
     );
   
+    const sortedSignateurs = dto.signateurs.map((signateurId) =>
+      signateurs.find((signateur) => signateur.userId === signateurId)
+    );
+  
     try {
-      const ids = signateurs.map((signateur) => ({ id: signateur.id }));
+      const ids = sortedSignateurs.map((signateur) => ({ id: signateur.id }));
       await this.prisma.folders.update({
         where: { id },
         data: {
@@ -377,8 +388,26 @@ export class FoldersService {
   }
 
   async delete(id: string) {
-    return await this.prisma.folders.delete({
+    // Supprimer les documents associés au dossier
+    await this.prisma.documents.deleteMany({
+      where: { folderId: id },
+    });
+
+    // Supprimer les signateurs associés au dossier
+    await this.prisma.signateurs.deleteMany({
+      where: { folderId: id },
+    });
+
+    // Supprimer les signatures associées au dossier
+    await this.prisma.signatures.deleteMany({
+      where: { folderId: id },
+    });
+
+    // Supprimer le dossier
+    const deletedFolder = await this.prisma.folders.delete({
       where: { id },
     });
+
+    return deletedFolder;
   }
 }
