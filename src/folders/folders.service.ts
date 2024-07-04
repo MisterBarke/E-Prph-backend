@@ -205,16 +205,16 @@ export class FoldersService {
     }
   
     const signateurs = await Promise.all(
-      users.map(async (user) => {
-        let signateur = await this.prisma.signateurs.findUnique({
-          where: { id: user.id },
+      dto.signateurs.map(async (userId) => {
+        let signateur = await this.prisma.signateurs.findFirst({
+          where: { userId, folderId: id },
         });
   
         if (!signateur) {
           signateur = await this.prisma.signateurs.create({
             data: {
-              userId: user.id,
-              folderId: id, 
+              userId,
+              folderId: id,
             },
           });
         }
@@ -223,17 +223,13 @@ export class FoldersService {
       })
     );
   
-    const sortedSignateurs = dto.signateurs.map((signateurId) =>
-      signateurs.find((signateur) => signateur.userId === signateurId)
-    );
   
     try {
-      const ids = sortedSignateurs.map((signateur) => ({ id: signateur.id }));
       await this.prisma.folders.update({
         where: { id },
         data: {
           signateurs: {
-            connect: ids,
+            connect: signateurs.map((signateur) => ({ id: signateur.id })),
           },
         },
       });
@@ -313,6 +309,11 @@ export class FoldersService {
       throw new HttpException('Vous n\'etes pas autorisé à signer ce dossier', 400);
     }
   
+    const signatureExistant = await this.prisma.signatures.findFirst({
+      where: { folderId, userId: connectedUser.id },
+    });
+    if (signatureExistant) throw new HttpException('Document déjà signé', 400);
+
     const nextSignateur = folder.signateurs[signaturePosition];
     if (nextSignateur.userId !== connectedUser.id) {
       throw new HttpException(
@@ -320,11 +321,6 @@ export class FoldersService {
         400
       );
     }
-
-    const signatureExistant = await this.prisma.signatures.findFirst({
-      where: { folderId, userId: connectedUser.id },
-    });
-    if (signatureExistant) throw new HttpException('Document déjà signé', 400);
 
     await this.prisma.signateurs.update({
       where: { id: userSignateur.id },
