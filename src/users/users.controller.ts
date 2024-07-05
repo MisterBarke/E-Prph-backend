@@ -67,7 +67,7 @@ export class UsersController {
     @Query()
     {
       decalage = 0,
-      limit = 20,
+      limit = 100,
       dateDebut,
       dateFin,
       isSignateurDossierAgricole,
