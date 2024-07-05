@@ -142,6 +142,7 @@ export class FoldersService {
       },
       include: {
         documents: true,
+        departement:true,
       },
     });
   }
@@ -222,7 +223,6 @@ export class FoldersService {
         return signateur;
       })
     );
-  
   
     try {
       await this.prisma.folders.update({
