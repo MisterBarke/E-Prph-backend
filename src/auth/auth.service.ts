@@ -185,6 +185,7 @@ export class AuthService {
         title: departementName,
         isCreditAgricole: isCreditAgricole ?? false,
         isServiceReseau: isServiceReseau ?? false,
+        isAccountant: isAccountant ?? false,
         users: {
           connect: {
             id: newUser.id,
@@ -238,20 +239,20 @@ export class AuthService {
   return newUser;
         
 
-        // this.mailService.sendMail({
-        //   companyContry: 'Niger',
-        //   companyName: 'BAGRI',
-        //   email,
-        //   subject: 'Informations de connexions',
-        //   template: 'credential',
-        //   title:
-        //     'Bienvenue au Parapheur de BAGRI, Veuiller se connecter avec le mot de passe',
-        //   context: {
-        //     username: email.split('@')[0].split('.').join(' '),
-        //     companyName: 'BAGRI',
-        //     password,
-        //   },
-        // });
+        this.mailService.sendMail({
+          companyContry: 'Niger',
+          companyName: 'BAGRI',
+          email,
+          subject: 'Informations de connexions',
+          template: 'credential',
+          title:
+            'Bienvenue au Parapheur de BAGRI, Veuiller se connecter avec le mot de passe',
+          context: {
+            username: email.split('@')[0].split('.').join(' '),
+            companyName: 'BAGRI',
+            password,
+          },
+        });
 
         //Create departement when create a departement admin member
       
