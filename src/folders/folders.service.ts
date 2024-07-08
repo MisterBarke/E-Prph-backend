@@ -31,6 +31,17 @@ export class FoldersService {
       },
     });
 
+    const highestNumber = await this.prisma.folders.findFirst({
+      orderBy: {
+        number: 'desc',
+      },
+      select: {
+        number: true,
+      },
+    });
+
+    const newNumber = highestNumber ? highestNumber.number + 1 : 1;
+
     const newData = await this.prisma.folders.create({
       data: {
         title: dto.title,
@@ -53,6 +64,7 @@ export class FoldersService {
             title: connectedUser.departement.title
           },
         },
+        number: newNumber
       },
     });
 
@@ -134,7 +146,7 @@ export class FoldersService {
         departement: true
       }
     });
-    if (connectedUser.role === 'ADMIN_MEMBER') {
+    if (connectedUser.role === 'ADMIN_MEMBER' && connectedUser.departement.isServiceReseau === false) {
       return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
@@ -157,6 +169,24 @@ export class FoldersService {
           },
         ]   
         },
+        include: {
+          documents: true,
+          departement:true,
+        },
+      });
+    }
+    if(connectedUser.departement.isServiceReseau === true){
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+            departement: {
+              isCreditAgricole: true,
+            },         
+            isValidateBeforeSignature: isValidate ? true : false,
+            isRejected: isRejected ? true : false,
+          },
+         
         include: {
           documents: true,
           departement:true,

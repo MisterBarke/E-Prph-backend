@@ -84,6 +84,7 @@ model Folders {
   signaturePosition Int @default(0)
   isSigningEnded Boolean @default(false)
   isVisibleByAccountant Boolean @default(false)
+  number                 Int?
 }
 
 //Definis les signateurs pour un dossier
