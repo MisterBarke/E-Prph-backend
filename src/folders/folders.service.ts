@@ -12,6 +12,7 @@ import {
   FolderValidationDto,
   AssignSignateurDto,
   FolderSignatureDto,
+  FolderVisibilityByAccountantDto,
 } from './dto/folders.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { log } from 'console';
@@ -122,29 +123,47 @@ export class FoldersService {
     });
   }
 
-  async getFoldersByServiceReseau({
-    limit,
-    decalage,
-    dateDebut,
-    dateFin,
-    isValidate = false,
-    isRejected = false,
-  }: PaginationParams) {
-    return await this.prisma.folders.findMany({
-      skip: +decalage,
-      take: +limit,
+  async getFoldersByAdmins({
+  limit, decalage, dateDebut, dateFin, isValidate = false, isRejected = false,
+}: PaginationParams, supabase_id: string) {
+    const connectedUser = await this.prisma.users.findUnique({
       where: {
-        departement: {
-          isCreditAgricole: true,
-        },
-        isValidateBeforeSignature: isValidate ? true : false,
-        isRejected: isRejected ? true : false,
+        supabase_id,
       },
-      include: {
-        documents: true,
-        departement:true,
-      },
+      include:{
+        departement: true
+      }
     });
+    if (connectedUser.role === 'ADMIN_MEMBER') {
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+          createdBy: {
+            id: connectedUser.id
+        },
+        OR: [
+          {
+            departement: {
+              isCreditAgricole: true,
+            },         
+            isValidateBeforeSignature: isValidate ? true : false,
+            isRejected: isRejected ? true : false,
+          },
+          {
+            departement: {
+              isCreditAgricole: false,
+            },
+          },
+        ]   
+        },
+        include: {
+          documents: true,
+          departement:true,
+        },
+      });
+    }
+  
   }
 
   async getFoldersBySignatory({
@@ -152,24 +171,38 @@ export class FoldersService {
     decalage,
     dateDebut,
     dateFin,
-    isRejected = false,
-    isValidate = true,
+
   }: PaginationParams, supabase_id: string) {
     const connectedUser = await this.prisma.users.findUnique({
       where: {
         supabase_id,
       },
     });
-    if (connectedUser.isSignateurDossierAgricole == true) {
+  
      return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where: {
-          departement: {
-            isCreditAgricole: true,
+          signateurs:{
+            some:{
+              userId: connectedUser.id,
+            }
           },
-          isValidateBeforeSignature: isValidate,
-          isRejected: isRejected,
+          OR: [
+            {
+              departement: {
+                isCreditAgricole: true,
+              },
+              isValidateBeforeSignature: true,
+              isRejected: false,
+            },
+            {
+              departement:{
+                isCreditAgricole: false,
+              }
+            }
+          ]
+          
         },
         include: {
           documents: true,
@@ -182,10 +215,44 @@ export class FoldersService {
         },
       });
       
-      
-    }else{
-      return 'Vous n\'etes pas autorisé à voir ces informations';
-    }
+  }
+
+  async getFoldersByAccountant({
+    limit,
+    decalage,
+    dateDebut,
+    dateFin,
+
+  }: PaginationParams, supabase_id: string) {
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        supabase_id,
+      },
+      include:{
+        departement:true
+      }
+    });
+  if(connectedUser.departement.isAccountant === true)
+     return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+         isSigningEnded: true
+        },
+        include: {
+          documents: true,
+          signateurs:{
+            include:{
+              user: true
+            }  
+          },
+          signatures:{
+            include:{
+              user: true
+            }
+          }
+        },
+      });
   }
 
   async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
@@ -333,6 +400,17 @@ export class FoldersService {
         signaturePosition: signaturePosition+1
       }
     })
+
+    if (signaturePosition === folder.signateurs.length){
+      await this.prisma.folders.update({
+        where:{id: folderId},
+        data:{
+          isSigningEnded: true
+        }
+      })
+      return "Tout le monde a signé. Dossier clos"
+    }
+
     const signature = await this.prisma.signatures.create({
       data: {
         signedAt: new Date(),
@@ -380,7 +458,44 @@ export class FoldersService {
         telephone: dto.telephone ?? data.telephone,
         email: dto.email ?? data.email,
       },
-    });
+    }); 
+  }
+
+  async updateVisibilityByAccountant(folderId: string, data: FolderVisibilityByAccountantDto,
+    supabase_id: string){
+      const connectedUser = await this.prisma.users.findUnique({
+        where: {
+          supabase_id,
+        },
+      });
+
+if (data.isVisible) {
+  const folder= await this.prisma.folders.findFirst({
+    where: {
+      id: folderId,
+      isSigningEnded: true,
+      createdBy: {
+        id: connectedUser.id,
+      },
+    },
+  });
+
+  if (!folder) {
+    throw new NotFoundException('Aucun dossier trouvé ou les conditions ne sont pas remplies');
+  }
+
+  return await this.prisma.folders.update({
+    where: {
+      id: folder.id,
+    },
+    data: {
+      isVisibleByAccountant: true,
+    },
+  });
+}else{
+  return 'Les signatures ne sont pas encore complétées'
+}
+    
   }
 
   async delete(id: string) {

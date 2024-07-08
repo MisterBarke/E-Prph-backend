@@ -52,6 +52,7 @@ model Departement {
   users Users[]  @relation("departements")
   isCreditAgricole Boolean @default(false)
   isServiceReseau Boolean @default(false)
+  isAccountant Boolean @default(false)
   folders Folders[]
   isDefault Boolean @default(false)
   createdAt  DateTime     @default(now())
@@ -81,6 +82,8 @@ model Folders {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   signaturePosition Int @default(0)
+  isSigningEnded Boolean @default(false)
+  isVisibleByAccountant Boolean @default(false)
 }
 
 //Definis les signateurs pour un dossier

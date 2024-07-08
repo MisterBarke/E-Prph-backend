@@ -66,7 +66,7 @@ export class FolderSignatureDto {
   @ApiProperty({
     type: 'string',
     name: 'description',
-    description: 'la propriété description de type string',
+    description: 'la propriété description de type bool',
     default: true,
   })
   @IsString()
@@ -177,4 +177,21 @@ export class PaginationParams {
   @Type(() => Boolean)
   @IsBoolean()
   isRejected?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isSigningEnded?: boolean;
+}
+
+export class FolderVisibilityByAccountantDto {
+  @ApiProperty({
+    type: 'boolean',
+    name: 'isVisible',
+    description: 'la propriété isVisible de type bool',
+    default: false,
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  isVisible: boolean;
 }

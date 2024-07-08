@@ -112,7 +112,7 @@ export class FoldersController {
   @ApiOperation({
     operationId: 'GetAllFoldersByserviceReseau',
   })
-  @Get('service_reseau')
+  @Get('admin_member')
   findAllServiceReseau(
     //@Query('search') search: string,
     @Query()
@@ -124,15 +124,16 @@ export class FoldersController {
       isRejected,
       isValidate,
     }: PaginationParams,
+    @Req() request,
   ) {
-    return this.foldersService.getFoldersByServiceReseau({
+    return this.foldersService.getFoldersByAdmins({
       decalage,
       limit,
       dateDebut,
       dateFin,
       isRejected,
       isValidate,
-    });
+    }, request.user.id);
   }
 
   //get by signatory
@@ -163,6 +164,41 @@ export class FoldersController {
     @Req() request,
   ) {
     return this.foldersService.getFoldersBySignatory({
+      decalage,
+      limit,
+      dateDebut,
+      dateFin,
+      isRejected,
+      isValidate
+    }, request.user.id);
+  }
+//les folders des compatables
+  @ApiCreatedResponse({ description: 'Tous les Folders by accountant' })
+  @ApiResponse({
+    status: 200,
+    description: 'Les Folders sont retrouvés',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'GetAllFoldersSignatory',
+  })
+  @Get('accountant')
+  findFoldersByAccountant(
+    //@Query('search') search: string,
+    @Query()
+    {
+      decalage = 0,
+      limit = 100,
+      dateDebut,
+      dateFin,
+      isRejected,
+      isValidate,
+    }: PaginationParams,
+    @Req() request,
+  ) {
+    return this.foldersService.getFoldersByAccountant({
       decalage,
       limit,
       dateDebut,
