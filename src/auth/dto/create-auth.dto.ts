@@ -104,6 +104,16 @@ export class RegisterDto {
   @IsBoolean()
   @IsOptional()
   isServiceReseau: boolean;
+
+  @ApiProperty({
+    type: 'boolean',
+    name: 'isAccountant',
+    description: 'la propriété isAccountant de type boolean',
+    default: '',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isAccountant: boolean;
 }
 
 export class updatePasswordDto {

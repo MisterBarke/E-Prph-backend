@@ -134,6 +134,7 @@ export class AuthService {
       departementName,
       isCreditAgricole,
       isServiceReseau,
+      isAccountant,
       position,
       matricule,
       signaturePosition,
