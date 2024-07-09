@@ -26,6 +26,7 @@ import {
   FolderValidationDto,
   AssignSignateurDto,
   FolderSignatureDto,
+  FolderVisibilityByAccountantDto,
 } from './dto/folders.dto';
 import { request } from 'http';
 
@@ -173,7 +174,7 @@ export class FoldersController {
     }, request.user.id);
   }
 //les folders des compatables
-  @ApiCreatedResponse({ description: 'Tous les Folders by accountant' })
+  @ApiCreatedResponse({ description: 'Tous les Folders signés' })
   @ApiResponse({
     status: 200,
     description: 'Les Folders sont retrouvés',
@@ -184,7 +185,7 @@ export class FoldersController {
   @ApiOperation({
     operationId: 'GetAllFoldersSignatory',
   })
-  @Get('accountant')
+  @Get('signed')
   findFoldersByAccountant(
     //@Query('search') search: string,
     @Query()
@@ -198,7 +199,7 @@ export class FoldersController {
     }: PaginationParams,
     @Req() request,
   ) {
-    return this.foldersService.getFoldersByAccountant({
+    return this.foldersService.getSignedFolders({
       decalage,
       limit,
       dateDebut,
@@ -258,6 +259,44 @@ export class FoldersController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateFoldersDto) {
     return this.foldersService.update(id, dto);
+  }
+
+
+  // edit folder Visibility
+  @ApiCreatedResponse({ description: 'Modification de Folders' })
+  @ApiResponse({
+    status: 200,
+    description: 'Folders est modifié',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: UpdateFoldersDto })
+  @ApiOperation({
+    operationId: 'UpdateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Put(':id/visibility')
+  updateVisibility(@Param('id') id: string,
+  @Body() dto: FolderVisibilityByAccountantDto,
+  @Req() request){
+    return this.foldersService.updateVisibilityByAccountant(id, dto, request.user.id);
   }
 
   @ApiCreatedResponse({ description: 'Modification de Folders' })

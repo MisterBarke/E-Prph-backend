@@ -154,6 +154,7 @@ export class FoldersService {
           createdBy: {
             id: connectedUser.id
         },
+         
         OR: [
           {
             departement: {
@@ -247,7 +248,7 @@ export class FoldersService {
       
   }
 
-  async getFoldersByAccountant({
+  async getSignedFolders({
     limit,
     decalage,
     dateDebut,
@@ -262,7 +263,6 @@ export class FoldersService {
         departement:true
       }
     });
-  if(connectedUser.departement.isAccountant === true)
      return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
@@ -499,11 +499,9 @@ export class FoldersService {
         },
       });
 
-if (data.isVisible) {
   const folder= await this.prisma.folders.findFirst({
     where: {
       id: folderId,
-      isSigningEnded: true,
       createdBy: {
         id: connectedUser.id,
       },
@@ -519,12 +517,9 @@ if (data.isVisible) {
       id: folder.id,
     },
     data: {
-      isVisibleByAccountant: true,
+      isVisibleByAccountant: data.isVisible,
     },
   });
-}else{
-  return 'Les signatures ne sont pas encore complétées'
-}
     
   }
 
