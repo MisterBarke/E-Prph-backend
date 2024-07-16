@@ -162,11 +162,13 @@ export class FoldersService {
             },         
             isValidateBeforeSignature: isValidate ? true : false,
             isRejected: isRejected ? true : false,
+            isSigningEnded: false
           },
           {
             departement: {
-              isCreditAgricole: false,
+              isCreditAgricole: false,  
             },
+            signaturePosition: 0
           },
         ]   
         },
@@ -186,6 +188,7 @@ export class FoldersService {
             },         
             isValidateBeforeSignature: isValidate ? true : false,
             isRejected: isRejected ? true : false,
+            signaturePosition: 0
           },
          
         include: {
@@ -226,11 +229,13 @@ export class FoldersService {
               },
               isValidateBeforeSignature: true,
               isRejected: false,
+              signaturePosition: 0
             },
             {
               departement:{
                 isCreditAgricole: false,
-              }
+              },
+              signaturePosition: 0
             }
           ]
           
@@ -241,7 +246,6 @@ export class FoldersService {
             include:{
               user: true
             }
-            
           },
         },
       });
@@ -253,6 +257,7 @@ export class FoldersService {
     decalage,
     dateDebut,
     dateFin,
+    isSigningEnded
 
   }: PaginationParams, supabase_id: string) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -260,14 +265,14 @@ export class FoldersService {
         supabase_id,
       },
       include:{
-        departement:true
+        departement:true,
       }
     });
      return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where: {
-         isSigningEnded: true
+         isSigningEnded: isSigningEnded
         },
         include: {
           documents: true,

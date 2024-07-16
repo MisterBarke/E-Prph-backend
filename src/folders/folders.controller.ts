@@ -186,7 +186,7 @@ export class FoldersController {
     operationId: 'GetAllFoldersSignatory',
   })
   @Get('signed')
-  findFoldersByAccountant(
+  findAllSignedFolders(
     //@Query('search') search: string,
     @Query()
     {
@@ -194,8 +194,7 @@ export class FoldersController {
       limit = 100,
       dateDebut,
       dateFin,
-      isRejected,
-      isValidate,
+      isSigningEnded
     }: PaginationParams,
     @Req() request,
   ) {
@@ -204,8 +203,7 @@ export class FoldersController {
       limit,
       dateDebut,
       dateFin,
-      isRejected,
-      isValidate
+      isSigningEnded
     }, request.user.id);
   }
 
