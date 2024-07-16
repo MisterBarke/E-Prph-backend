@@ -16,10 +16,11 @@ import {
 } from './dto/folders.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { log } from 'console';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class FoldersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private mailService: MailService) {}
 
   async create(dto: CreateFoldersDto, supabase_id: string) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -335,6 +336,28 @@ export class FoldersService {
           },
         },
       });
+
+      const folder = await this.prisma.folders.findUnique({
+        where: {
+          id
+        },
+      });
+
+      for (const user of users) {
+        await this.mailService.sendNoticationForSignature({
+          email: user.email,
+          subject: 'Nouvelle demande de signature',
+          title: 'Notification de Signature',
+          companyName: 'Votre Entreprise',
+          companyContry: 'Votre Pays',
+          template: 'notification',
+          context: {
+            username: user.name,
+            documentName: `${folder.title}`,
+            folderNumber: `${folder.number}`
+          }
+        });
+      }
   
       return 'updated';
     } catch (error) {
@@ -410,8 +433,6 @@ export class FoldersService {
     if (!userSignateur) {
       throw new HttpException('Vous n\'etes pas autorisé à signer ce dossier', 400);
     }
-    console.log('signateurs length herer', folder.signateurs.length)
-    console.log('signature position here', folder.signaturePosition);
     
   
     const signatureExistant = await this.prisma.signatures.findFirst({
@@ -439,8 +460,6 @@ export class FoldersService {
       }
       
     })
- console.log('hello barke outside');
- console.log('=======',folder.signaturePosition);
 
  const updatedFolder = await this.prisma.folders.findUnique({
   where: { id: folderId },
@@ -450,8 +469,6 @@ export class FoldersService {
 });
  
     if (updatedFolder.signaturePosition === folder.signateurs.length){
-      console.log('hello barke inside');
-      
       await this.prisma.folders.update({
         where:{id: folderId},
         data:{

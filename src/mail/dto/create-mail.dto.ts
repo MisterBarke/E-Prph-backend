@@ -21,6 +21,11 @@ export type CredentialMailDTO = {
   companyName: string;
   password: string;
 };
+export type NotificationMailDTO = {
+  username: string;
+  documentName: string;
+  folderNumber: string
+};
 
 export const mailTemplateDirectory = '../../mail/templates';
 export const layoutFilDirename = 'layout/global.hbs';
