@@ -45,7 +45,7 @@ export class UsersController {
   @Get('')
   findAll(
     //@Query('search') search: string,
-    @Query() { decalage = 0, limit = 100, dateDebut, dateFin }: PaginationParams,
+    @Query() { decalage = 0, limit = 200, dateDebut, dateFin }: PaginationParams,
   ) {
     return this.usersService.findAll({ decalage, limit, dateDebut, dateFin });
   }
@@ -67,7 +67,7 @@ export class UsersController {
     @Query()
     {
       decalage = 0,
-      limit = 100,
+      limit = 200,
       dateDebut,
       dateFin,
       isSignateurDossierAgricole,
@@ -90,7 +90,7 @@ export class UsersController {
   @Get('members')
   findAllMember(
     //@Query('search') search: string,
-    @Query() { decalage = 0, limit = 100, dateDebut, dateFin }: PaginationParams,
+    @Query() { decalage = 0, limit = 200, dateDebut, dateFin }: PaginationParams,
     @Req() request,
   ) {
     return this.usersService.findAllDepartementMember(request.user.id);
