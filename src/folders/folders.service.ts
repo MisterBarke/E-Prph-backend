@@ -405,6 +405,9 @@ export class FoldersService {
     if (!userSignateur) {
       throw new HttpException('Vous n\'etes pas autorisé à signer ce dossier', 400);
     }
+    console.log('signateurs length herer', folder.signateurs.length)
+    console.log('signature position here', folder.signaturePosition);
+    
   
     const signatureExistant = await this.prisma.signatures.findFirst({
       where: { folderId, userId: connectedUser.id },
@@ -429,16 +432,28 @@ export class FoldersService {
       data:{
         signaturePosition: signaturePosition+1
       }
+      
     })
+ console.log('hello barke outside');
+ console.log('=======',folder.signaturePosition);
 
-    if (signaturePosition === folder.signateurs.length){
+ const updatedFolder = await this.prisma.folders.findUnique({
+  where: { id: folderId },
+  include: {
+    signateurs: true
+  }
+});
+ 
+    if (updatedFolder.signaturePosition === folder.signateurs.length){
+      console.log('hello barke inside');
+      
       await this.prisma.folders.update({
         where:{id: folderId},
         data:{
           isSigningEnded: true
         }
       })
-      return "Tout le monde a signé. Dossier clos"
+      return "Tout le monde a signé. Dossier clot"
     }
 
     const signature = await this.prisma.signatures.create({
@@ -509,8 +524,9 @@ export class FoldersService {
   });
 
   if (!folder) {
-    throw new NotFoundException('Aucun dossier trouvé ou les conditions ne sont pas remplies');
+    throw new NotFoundException('Aucun dossier trouvé');
   }
+
 
   return await this.prisma.folders.update({
     where: {
