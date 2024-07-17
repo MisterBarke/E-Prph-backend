@@ -258,7 +258,7 @@ export class FoldersService {
     decalage,
     dateDebut,
     dateFin,
-    isSigningEnded
+    isSigningEnded = false
 
   }: PaginationParams, supabase_id: string) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -273,7 +273,7 @@ export class FoldersService {
         skip: +decalage,
         take: +limit,
         where: {
-         isSigningEnded: isSigningEnded
+         isSigningEnded: isSigningEnded ? true: false
         },
         include: {
           documents: true,
