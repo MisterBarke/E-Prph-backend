@@ -149,8 +149,41 @@ export class UsersService {
   }
 
   async delete(id: string) {
-    return await this.prisma.users.delete({
+    const user = await this.prisma.users.findUnique({
+      where: { id },
+      include: {
+        signatures: true,
+        signateursRole: true,
+        documents: true,
+        folders: true,
+      },
+    });
+  
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.prisma.signatures.deleteMany({
+      where: { userId: id },
+    });
+  
+    await this.prisma.signateurs.deleteMany({
+      where: { userId: id },
+    });
+  
+    await this.prisma.documents.deleteMany({
+      where: { createdById: id },
+    });
+  
+    await this.prisma.folders.deleteMany({
+      where: { createdById: id },
+    });
+  
+    // Delete the user
+    const deletedUser = await this.prisma.users.delete({
       where: { id },
     });
+  
+    return deletedUser;
+    
   }
 }

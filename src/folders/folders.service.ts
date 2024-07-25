@@ -230,13 +230,11 @@ export class FoldersService {
               },
               isValidateBeforeSignature: true,
               isRejected: false,
-              signaturePosition: 0
             },
             {
               departement:{
                 isCreditAgricole: false,
               },
-              signaturePosition: 0
             }
           ]
           
