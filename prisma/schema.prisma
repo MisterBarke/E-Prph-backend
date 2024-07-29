@@ -13,18 +13,19 @@ model Users {
   supabase_id    String       @unique
   phone          String
   matricule      String?
-  position       String?
+  position           String?
   name           String?   
   userSignatureUrl String?
   isSignateurDossierAgricole Boolean @default(false)
   role           Role
-  signatures     Signatures[] @relation("signatures", onDelete: CASCADE)
-  signateursRole Signateurs[] @relation("signateurs", onDelete: CASCADE)
-  departement    Departement? @relation("departements", fields: [departementId], references: [id], onDelete: SET_NULL)
-  departementId  String?      @db.ObjectId
-  rejected       Folders[]    @relation("rejet", onDelete: SET_NULL)
-  folders        Folders[]    @relation("createdByRelation", onDelete: CASCADE)
-  documents      Documents[]  @relation("createdByDocuments", onDelete: CASCADE)
+  signatures     Signatures[] @relation("signatures")
+  signateursRole     Signateurs[] @relation("signateurs")
+  // departementChef Departement[]  @relation("departementChefRelation")
+  departement Departement?     @relation("departements", fields: [departementId], references: [id])
+  departementId     String?    @db.ObjectId
+  rejected Folders[]  @relation("rejet")
+  folders Folders[]
+  documents Documents[]
   isPasswordInit Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -32,13 +33,13 @@ model Users {
 
 model Documents {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
-  url        String
+  url       String
   title      String
-  createdBy  Users        @relation(fields: [createdById], references: [id], onDelete: CASCADE)
-  createdById String      @db.ObjectId
-  isPrincipal Boolean     @default(false)
-  folder     Folders      @relation(fields: [folderId], references: [id], onDelete: CASCADE)
-  folderId   String       @db.ObjectId
+  createdBy        Users     @relation(fields: [createdById], references: [id])
+  createdById     String    @db.ObjectId
+  isPrincipal Boolean @default(false)
+  folder       Folders     @relation( fields: [folderId], references: [id])
+  folderId     String    @db.ObjectId
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 }
@@ -46,70 +47,73 @@ model Documents {
 model Departement {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
   title      String
-  users      Users[]      @relation("departements", onDelete: SET_NULL)
+  // chefDepartement       Users     @relation("departementChefRelation", fields: [chefDepartementId], references: [id])
+  // chefDepartementId     String    @db.ObjectId
+  users Users[]  @relation("departements")
   isCreditAgricole Boolean @default(false)
   isServiceReseau Boolean @default(false)
   isAccountant Boolean @default(false)
-  folders    Folders[]    @relation("departementFolders", onDelete: CASCADE)
-  isDefault  Boolean      @default(false)
+  folders Folders[]
+  isDefault Boolean @default(false)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 }
 
 model Folders {
-  id             String       @id @default(auto()) @map("_id") @db.ObjectId
-  title          String
-  description    String
-  nom            String?
-  adress         String?
-  telephone      String?
-  email          String?
-  isDefault      Boolean      @default(false)
-  isRejected     Boolean      @default(false)
-  rejected       Users?       @relation("rejet", fields: [rejectedId], references: [id], onDelete: SET_NULL)
-  rejectedId     String?      @db.ObjectId
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  description       String
+  nom       String?
+  adress       String?
+  telephone       String?
+  email       String?
+  isDefault Boolean @default(false)
+  isRejected Boolean @default(false)
+  rejected        Users?     @relation("rejet", fields: [rejectedId], references: [id])
+  rejectedId     String?    @db.ObjectId
   isValidateBeforeSignature Boolean @default(false)
-  createdBy      Users        @relation("createdByRelation", fields: [createdById], references: [id], onDelete: CASCADE)
-  createdById    String       @db.ObjectId
-  signateurs     Signateurs[] @relation("documentssignateurs", onDelete: CASCADE)
-  signatures     Signatures[] @relation("signer", onDelete: CASCADE)
-  documents      Documents[]  @relation("folderDocuments", onDelete: CASCADE)
-  departement    Departement  @relation(fields: [departementId], references: [id], onDelete: CASCADE)
-  departementId  String       @db.ObjectId
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now())
-  signaturePosition Int       @default(0)
-  isSigningEnded Boolean      @default(false)
+  createdBy        Users     @relation(fields: [createdById], references: [id])
+  createdById     String    @db.ObjectId
+  signateurs Signateurs[] @relation("documentssignateurs")
+  signatures Signatures[] @relation("signer")
+  documents Documents[]
+  departement       Departement     @relation( fields: [departementId], references: [id])
+  departementId     String    @db.ObjectId
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  signaturePosition Int @default(0)
+  isSigningEnded Boolean @default(false)
   isVisibleByAccountant Boolean @default(false)
-  number         Int?
+  number                 Int?
 }
 
+//Definis les signateurs pour un dossier
 model Signateurs {
-  id         String       @id @default(auto()) @map("_id") @db.ObjectId
-  user       Users        @relation("signateurs", fields: [userId], references: [id], onDelete: CASCADE)
-  userId     String       @db.ObjectId
-  folder     Folders      @relation("documentssignateurs", fields: [folderId], references: [id], onDelete: CASCADE)
-  folderId   String       @db.ObjectId
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @default(now())
-  hasSigned  Boolean      @default(false)
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  user       Users     @relation("signateurs", fields: [userId], references: [id])
+  userId     String    @db.ObjectId
+  folder   Folders @relation("documentssignateurs", fields: [folderId], references: [id])
+  folderId String    @db.ObjectId
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  hasSigned Boolean @default(false)
 }
 
 model Signatures {
-  id         String       @id @default(auto()) @map("_id") @db.ObjectId
-  user       Users        @relation("signatures", fields: [userId], references: [id], onDelete: CASCADE)
-  userId     String       @db.ObjectId
-  folder     Folders      @relation("signer", fields: [folderId], references: [id], onDelete: CASCADE)
-  folderId   String       @db.ObjectId
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  user       Users     @relation("signatures", fields: [userId], references: [id])
+  userId     String    @db.ObjectId
+  folder   Folders @relation("signer", fields: [folderId], references: [id])
+  folderId String    @db.ObjectId
   description String
   signedAt   DateTime
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @default(now())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 enum Role {
-  ADMIN       // DSI
-  MEMBER      // Signateur
-  ADMIN_MEMBER // Chef de departement
-  SUDO        // Développeur
+  ADMIN //DSI
+  MEMBER //Signateur
+  ADMIN_MEMBER //Chef de departement
+  SUDO //Développeur
 }
