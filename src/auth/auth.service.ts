@@ -119,7 +119,7 @@ export class AuthService {
   generatePassword() {
     const alphabets = 'AZERTYUIOPMLKJHGFDSQWXCVBN'.split('');
     // TODO: Delete this after dev
-    return `123456`;
+    //return `123456`;
     return `${Math.floor(Math.random() * 100000000)}`
       .split('')
       .map((el, i) =>
@@ -137,7 +137,7 @@ export class AuthService {
       isAccountant,
       position,
       matricule,
-      signaturePosition,
+      isFromNiamey,
     }: RegisterDto,
     role: Role = Role.MEMBER,
     supabaseId?: string,
@@ -187,6 +187,7 @@ export class AuthService {
         isCreditAgricole: isCreditAgricole ?? false,
         isServiceReseau: isServiceReseau ?? false,
         isAccountant: isAccountant ?? false,
+        isFromNiamey: isFromNiamey ?? false,
         users: {
           connect: {
             id: newUser.id,
@@ -237,9 +238,7 @@ export class AuthService {
 
     return { user: updatedUser, departement: connectedUser.departement };
   }
-  return newUser;
-        
-
+ 
         this.mailService.sendMail({
           companyContry: 'Niger',
           companyName: 'BAGRI',
@@ -247,14 +246,14 @@ export class AuthService {
           subject: 'Informations de connexions',
           template: 'credential',
           title:
-            'Bienvenue au Parapheur de BAGRI, Veuiller se connecter avec le mot de passe',
+            'Bienvenue au Parapheur de BAGRI, Veuiller Vous connecter avec le mot de passe',
           context: {
             username: email.split('@')[0].split('.').join(' '),
             companyName: 'BAGRI',
             password,
           },
         });
-
+        return newUser;
         //Create departement when create a departement admin member
       
       });

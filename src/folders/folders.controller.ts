@@ -119,7 +119,7 @@ export class FoldersController {
     @Query()
     {
       decalage = 0,
-      limit = 100,
+      limit = 200,
       dateDebut,
       dateFin,
       isRejected,

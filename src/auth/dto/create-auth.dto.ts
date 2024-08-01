@@ -114,6 +114,16 @@ export class RegisterDto {
   @IsBoolean()
   @IsOptional()
   isAccountant: boolean;
+
+  @ApiProperty({
+    type: 'boolean',
+    name: 'isFromNiamey',
+    description: 'la propriété isFromNiamey de type boolean',
+    default: '',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isFromNiamey: boolean;
 }
 
 export class updatePasswordDto {

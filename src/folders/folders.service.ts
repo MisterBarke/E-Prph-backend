@@ -179,7 +179,7 @@ export class FoldersService {
         },
       });
     }
-    if(connectedUser.departement.isServiceReseau === true){
+    if(connectedUser.role === 'ADMIN_MEMBER' && connectedUser.departement.isServiceReseau === true){
       return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
@@ -198,6 +198,20 @@ export class FoldersService {
         },
       });
     }
+
+    if (connectedUser.role == "ADMIN") {
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        include: {
+          documents: true,
+          departement:true,
+          createdBy: true,
+          signateurs:true,
+          signatures:true, 
+        },
+      });
+    }
   
   }
 
@@ -205,7 +219,7 @@ export class FoldersService {
     limit,
     decalage,
     dateDebut,
-    dateFin,
+    dateFin, 
 
   }: PaginationParams, supabase_id: string) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -227,9 +241,20 @@ export class FoldersService {
             {
               departement: {
                 isCreditAgricole: true,
+                isFromNiamey: false
               },
               isValidateBeforeSignature: true,
               isRejected: false,
+
+            },
+            {
+              departement: {
+                isCreditAgricole: true,
+                isFromNiamey: true
+              },
+              isRejected: false,
+              isValidateBeforeSignature: false
+
             },
             {
               departement:{
@@ -251,6 +276,7 @@ export class FoldersService {
       
   }
 
+  
   async getSignedFolders({
     limit,
     decalage,
@@ -346,28 +372,27 @@ export class FoldersService {
           email: user.email,
           subject: 'Nouvelle demande de signature',
           title: 'Notification de Signature',
-          companyName: 'Votre Entreprise',
-          companyContry: 'Votre Pays',
+          companyName: 'BAGRI Niger',
+          companyContry: 'Niger',
           template: 'notification',
           context: {
             username: user.name,
-            documentName: `${folder.title}`,
+            documentName: folder.title,
             folderNumber: `${folder.number}`
           }
         });
       }
-  
-      return 'updated';
+      return 'Signatories added';
     } catch (error) {
       console.error(error);
       if (error.code === 'P2018') {
-        throw new HttpException('Failed to update folder with signateurs: connected records not found', 500);
+        throw new HttpException('Failed to update folder: connected records not found', 500);
       } else {
-        throw new HttpException('Failed to update folder with signateurs', 500);
+        throw new HttpException('Failed to update folder', 500);
       }
     }
   }
-
+ 
   async folderValidationByServiceReseau(
     id: string,
     data: FolderValidationDto,
@@ -533,7 +558,7 @@ export class FoldersService {
           supabase_id,
         },
       });
-
+   
   const folder= await this.prisma.folders.findFirst({
     where: {
       id: folderId,
