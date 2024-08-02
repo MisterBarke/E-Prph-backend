@@ -28,6 +28,7 @@ export default () => ({
   },
   mail: {
     host: process.env.MAIL_HOST_NAME,
+    port: int(process.env.MAIL_PORT, 465),
     isSecure: bool(process.env.MAIL_HOST_SECURE, true),
     user: process.env.MAIL_AUTH_USER,
     password: process.env.MAIL_AUTH_PASSWORD,
