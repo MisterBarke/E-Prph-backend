@@ -176,6 +176,7 @@ export class FoldersService {
         include: {
           documents: true,
           departement:true,
+          createdBy: true
         },
       });
     }
@@ -195,6 +196,7 @@ export class FoldersService {
         include: {
           documents: true,
           departement:true,
+          createdBy:true
         },
       });
     }
