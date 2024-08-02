@@ -271,6 +271,7 @@ export class FoldersService {
               user: true
             }
           },
+          createdBy: true
         },
       });
       
