@@ -23,7 +23,7 @@ export type CredentialMailDTO = {
 };
 export type NotificationMailDTO = {
   username: string;
-  documentName: string;
+  folderName: string;
   folderNumber: string
 };
 

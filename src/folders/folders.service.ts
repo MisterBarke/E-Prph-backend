@@ -169,7 +169,7 @@ export class FoldersService {
             departement: {
               isCreditAgricole: false,  
             },
-            signaturePosition: 0
+            //signaturePosition: 0
           },
         ]   
         },
@@ -190,7 +190,7 @@ export class FoldersService {
             },         
             isValidateBeforeSignature: isValidate ? true : false,
             isRejected: isRejected ? true : false,
-            signaturePosition: 0
+           //  signaturePosition: 0
           },
          
         include: {
@@ -243,7 +243,7 @@ export class FoldersService {
             {
               departement: {
                 isCreditAgricole: true,
-                isFromNiamey: false
+              isFromNiamey: false
               },
               isValidateBeforeSignature: true,
               isRejected: false,
@@ -252,7 +252,7 @@ export class FoldersService {
             {
               departement: {
                 isCreditAgricole: true,
-                isFromNiamey: true
+               isFromNiamey: true
               },
               isRejected: false,
               isValidateBeforeSignature: false
@@ -370,21 +370,21 @@ export class FoldersService {
         },
       });
 
-      for (const user of users) {
+      
         await this.mailService.sendNoticationForSignature({
-          email: user.email,
+          email: users[0].email,
           subject: 'Nouvelle demande de signature',
           title: 'Notification de Signature',
           companyName: 'BAGRI Niger',
           companyContry: 'Niger',
           template: 'notification',
           context: {
-            username: user.name,
-            documentName: folder.title,
+            username: users[0].name,
+            folderName: folder.title,
             folderNumber: `${folder.number}`
           }
         });
-      }
+      
       return 'Signatories added';
     } catch (error) {
       console.error(error);
@@ -511,6 +511,20 @@ export class FoldersService {
         description: dto.description,
         user: { connect: { id: connectedUser.id } },
       },
+    });
+
+    await this.mailService.sendNoticationForSignature({
+      email: nextSignateur.user.email,
+      subject: 'Nouvelle demande de signature',
+      title: 'Notification de Signature',
+      companyName: 'BAGRI Niger',
+      companyContry: 'Niger',
+      template: 'notification',
+      context: {
+        username: nextSignateur.user.name,
+        folderName: folder.title,
+        folderNumber: `${folder.number}`
+      }
     });
 
     return signature;

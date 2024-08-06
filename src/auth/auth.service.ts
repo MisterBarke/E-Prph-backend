@@ -239,7 +239,7 @@ export class AuthService {
     return { user: updatedUser, departement: connectedUser.departement };
   }
  
-        this.mailService.sendMail({
+       await this.mailService.sendMail({
           companyContry: 'Niger',
           companyName: 'BAGRI',
           email,
@@ -253,9 +253,14 @@ export class AuthService {
             password,
           },
         });
+
         return newUser;
         //Create departement when create a departement admin member
       
+      })
+      .catch((err) => {
+        console.error(err)
+        throw new UnauthorizedException();
       });
   }
 }
