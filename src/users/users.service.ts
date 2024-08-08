@@ -74,6 +74,9 @@ export class UsersService {
     return await this.prisma.users.findMany({
       skip: decalage,
       take: limit,
+      include:{
+        departement:true
+      }
     });
   }
 
@@ -81,7 +84,6 @@ export class UsersService {
     return await this.prisma.users.findMany({
       where: {
         role: 'MEMBER',
-        isSignateurDossierAgricole: isSignateurDossierAgricole ? true : false,
       },
       include: {
         departement: true,
