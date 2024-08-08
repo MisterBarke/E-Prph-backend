@@ -4,6 +4,7 @@ import {
   Post,
   ConflictException,
   HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   CreateUsersDto,
@@ -183,7 +184,25 @@ export class UsersService {
       where: { id },
     });
   
-    return deletedUser;
+    return deletedUser; 
     
+  }
+
+  async forgotPassword(id: string) {
+    const user = await this.prisma.users.findUnique({
+      where:{id}
+    })
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    try {
+      const changePwd = await this.prisma.users.update({
+        where:{id},
+        data: {isPasswordInit: false}
+      })
+      return changePwd
+    } catch (error) {
+      console.error(error)
+    }
   }
 }

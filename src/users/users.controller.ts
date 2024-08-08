@@ -204,4 +204,41 @@ export class UsersController {
   delete(@Param('id') id: string) {
     return this.usersService.delete(id);
   }
+
+  @ApiCreatedResponse({ description: 'Modification de Users' })
+  @ApiResponse({
+    status: 200,
+    description: 'Users est modifié',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: UpdateUsersDto })
+  @ApiOperation({
+    operationId: 'changeUserRole',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Roles('ADMIN')
+  @Put(':id/forgot_password')
+  forgotPassword(
+    @Param('id') id: string,
+  ) {
+    return this.usersService.forgotPassword(id);
+  }
 }
