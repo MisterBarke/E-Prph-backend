@@ -163,7 +163,7 @@ export class FoldersService {
             },         
             isValidateBeforeSignature: isValidate ? true : false,
             isRejected: isRejected ? true : false,
-            isSigningEnded: false
+            //isSigningEnded: false
           },
           {
             departement: {
@@ -296,7 +296,8 @@ export class FoldersService {
         departement:true,
       }
     });
-     return await this.prisma.folders.findMany({
+    if(connectedUser.role === 'ADMIN'){
+      return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where: {
@@ -316,6 +317,60 @@ export class FoldersService {
           }
         },
       });
+    }
+    if (connectedUser.role === 'ADMIN_MEMBER') {
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+         createdBy:{
+          id: connectedUser.id,
+         },
+         isSigningEnded: isSigningEnded ? true: false
+        },
+        include: {
+          documents: true,
+          signateurs:{
+            include:{
+              user: true
+            }  
+          },
+          signatures:{
+            include:{
+              user: true
+            }
+          }
+        },
+      });
+    }
+    if (connectedUser.role === 'MEMBER') {
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+         signateurs:{
+          some: {
+            userId: connectedUser.id
+          }
+         },
+         isSigningEnded: isSigningEnded ? true: false
+        },
+        include: {
+          documents: true,
+          signateurs:{
+            include:{
+              user: true
+            }  
+          },
+          signatures:{
+            include:{
+              user: true
+            }
+          }
+        },
+      });
+    }
+
   }
 
   async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {

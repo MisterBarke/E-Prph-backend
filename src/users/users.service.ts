@@ -143,7 +143,7 @@ export class UsersService {
     if (!data) throw new NotFoundException("L'identifiant id n'existe pas");
     return await this.prisma.users.update({
       where: { id },
-      data: {
+      data: { 
         role: dto.role,
       },
     });
