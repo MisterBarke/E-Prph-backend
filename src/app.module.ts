@@ -19,6 +19,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 // import { JwtAuthGuard } from './auth/guards/supabase.guard';
 import { UploadModule } from './upload/upload.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
 
 dotenv.config();
 
@@ -50,7 +51,7 @@ dotenv.config();
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
-    // SupabaseStrategy,
+    JwtStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
