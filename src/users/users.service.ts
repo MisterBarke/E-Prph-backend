@@ -22,15 +22,15 @@ export class UsersService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    this.supabaseClient = createClient(
-      this.configService.get<string>('supabase.url'),
-      this.configService.get<string>('supabase.key'),
-      {
-        auth: {
-          persistSession: false,
-        },
-      },
-    );
+    // this.supabaseClient = createClient(
+    //   this.configService.get<string>('supabase.url'),
+    //   this.configService.get<string>('supabase.key'),
+    //   {
+    //     auth: {
+    //       persistSession: false,
+    //     },
+    //   },
+    // );
   }
   async findDuplicates(data) {
     const duplicateValues = await this.prisma.users.findFirst({
@@ -38,9 +38,6 @@ export class UsersService {
         OR: [
           {
             email: data.email,
-          },
-          {
-            supabase_id: data.supabase_id,
           },
         ],
         id: {
@@ -62,9 +59,9 @@ export class UsersService {
     const newData = await this.prisma.users.create({
       data: {
         email: dto.email,
-        supabase_id: dto.supabase_id,
         phone: dto.phone,
         role: dto.role,
+        password: '',
       },
     });
     return newData;
@@ -74,9 +71,9 @@ export class UsersService {
     return await this.prisma.users.findMany({
       skip: decalage,
       take: limit,
-      include:{
-        departement:true
-      }
+      include: {
+        departement: true,
+      },
     });
   }
 
@@ -91,10 +88,10 @@ export class UsersService {
     });
   }
 
-  async findAllDepartementMember(supabaseId: string) {
+  async findAllDepartementMember(userId: string) {
     const connectedUser = await this.prisma.users.findUnique({
       where: {
-        supabase_id: supabaseId,
+        id: userId,
       },
       include: {
         departement: true,
@@ -115,9 +112,9 @@ export class UsersService {
     });
   }
 
-  async findOneBySupabaseId(supabase_id: string) {
+  async findOneBySupabaseId(userId: string) {
     return await this.prisma.users.findUnique({
-      where: { supabase_id },
+      where: { id: userId },
     });
   }
 
@@ -135,7 +132,7 @@ export class UsersService {
         email: dto.email ?? data.email,
         phone: dto.phone ?? data.phone,
         name: dto.name ?? data.name,
-        matricule: dto.matricule?? data.matricule
+        matricule: dto.matricule ?? data.matricule,
       },
     });
   }
@@ -145,7 +142,7 @@ export class UsersService {
     if (!data) throw new NotFoundException("L'identifiant id n'existe pas");
     return await this.prisma.users.update({
       where: { id },
-      data: { 
+      data: {
         role: dto.role,
       },
     });
@@ -161,50 +158,49 @@ export class UsersService {
         folders: true,
       },
     });
-  
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
     await this.prisma.signatures.deleteMany({
       where: { userId: id },
     });
-  
+
     await this.prisma.signateurs.deleteMany({
       where: { userId: id },
     });
-  
+
     await this.prisma.documents.deleteMany({
       where: { createdById: id },
     });
-  
+
     await this.prisma.folders.deleteMany({
       where: { createdById: id },
     });
-  
+
     // Delete the user
     const deletedUser = await this.prisma.users.delete({
       where: { id },
     });
-  
-    return deletedUser; 
-    
+
+    return deletedUser;
   }
 
   async forgotPassword(id: string) {
     const user = await this.prisma.users.findUnique({
-      where:{id}
-    })
+      where: { id },
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
     try {
       const changePwd = await this.prisma.users.update({
-        where:{id},
-        data: {isPasswordInit: false}
-      })
-      return changePwd
+        where: { id },
+        data: { isPasswordInit: false },
+      });
+      return changePwd;
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 }

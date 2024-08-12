@@ -16,8 +16,9 @@ import { AuthModule } from './auth/auth.module';
 import { SupabaseStrategy } from './auth/strategies/supabase.strategy';
 import { MailModule } from './mail/mail.module';
 import { RolesGuard } from './auth/guards/roles.guard';
-import { JwtAuthGuard } from './auth/guards/supabase.guard';
+// import { JwtAuthGuard } from './auth/guards/supabase.guard';
 import { UploadModule } from './upload/upload.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 dotenv.config();
 
@@ -49,7 +50,7 @@ dotenv.config();
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
-    SupabaseStrategy,
+    // SupabaseStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
@@ -60,6 +61,6 @@ dotenv.config();
     },
     AppService,
   ],
-  exports: [SupabaseStrategy],
+  // exports: [SupabaseStrategy],
 })
 export class AppModule {}
