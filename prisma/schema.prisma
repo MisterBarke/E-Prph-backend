@@ -10,7 +10,9 @@ datasource db {
 model Users {
   id             String       @id @default(auto()) @map("_id") @db.ObjectId
   email          String       @unique
-  supabase_id    String       @unique
+  password        String @default("")
+  refresh_token   String?
+  // supabase_id    String       @unique
   phone          String
   matricule      String?
   position           String?

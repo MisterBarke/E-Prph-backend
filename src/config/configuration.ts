@@ -34,4 +34,8 @@ export default () => ({
     password: process.env.MAIL_AUTH_PASSWORD,
     from: process.env.MAIL_DEFAULT_FROM,
   },
+  jwt: {
+    secret: process.env.JWT_SECRET_KEY,
+    expire: process.env.JWT_EXPIRATION_TIME,
+  },
 });

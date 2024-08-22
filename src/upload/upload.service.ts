@@ -10,20 +10,20 @@ export class UploadService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    this.supabaseClient = createClient(
-      this.configService.get<string>('supabase.url'),
-      this.configService.get<string>('supabase.key'),
-      {
-        auth: {
-          persistSession: false,
-        },
-      },
-    );
+    // this.supabaseClient = createClient(
+    //   this.configService.get<string>('supabase.url'),
+    //   this.configService.get<string>('supabase.key'),
+    //   {
+    //     auth: {
+    //       persistSession: false,
+    //     },
+    //   },
+    // );
   }
-  async getFiles(supabaseId: string) {
+  async getFiles(userId: string) {
     const connectedUser = await this.prisma.users.findFirst({
       where: {
-        supabase_id: supabaseId,
+        id: userId,
       },
       include: {
         departement: true,
@@ -47,7 +47,7 @@ export class UploadService {
   async uploadFile(
     file: Express.Multer.File,
     signature = false,
-    supabaseId?: string,
+    userId?: string,
   ) {
     const folder = 'dossiers';
     const name = `ph_${Math.ceil(Math.random() * 1000)}ph_${Date.now()}ph_${
@@ -63,7 +63,7 @@ export class UploadService {
       if (signature) {
         await this.prisma.users.update({
           where: {
-            supabase_id: supabaseId,
+            id: userId,
           },
           data: {
             userSignatureUrl: url,
@@ -73,7 +73,7 @@ export class UploadService {
         //set file to default folder
         const connectedUser: any = await this.prisma.users.findFirst({
           where: {
-            supabase_id: supabaseId,
+            id: userId,
           },
           include: {
             departement: true,
@@ -83,8 +83,8 @@ export class UploadService {
           let defaultDepartement = await this.prisma.departement.findFirst({
             where: {
               isDefault: true,
-            }
-          })
+            },
+          });
           if (!defaultDepartement) {
             defaultDepartement = await this.prisma.departement.create({
               data: {
@@ -101,10 +101,10 @@ export class UploadService {
               departement: {
                 connect: {
                   id: defaultDepartement.id,
-                }
-              }
+                },
+              },
             },
-          })
+          });
           connectedUser['departement'] = [defaultDepartement];
         }
         let defaultFolder = await this.prisma.folders.findFirst({
