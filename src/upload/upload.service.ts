@@ -31,7 +31,6 @@ export class UploadService {
     });
     const folder = await this.prisma.folders.findFirst({
       where: {
-        isDefault: true,
         departement: {
           id: connectedUser.departement?.id,
         },
@@ -81,15 +80,11 @@ export class UploadService {
         });
         if (!connectedUser.departement?.id) {
           let defaultDepartement = await this.prisma.departement.findFirst({
-            where: {
-              isDefault: true,
-            },
           });
           if (!defaultDepartement) {
             defaultDepartement = await this.prisma.departement.create({
               data: {
                 title: '',
-                isDefault: true,
               },
             });
           }
@@ -109,14 +104,12 @@ export class UploadService {
         }
         let defaultFolder = await this.prisma.folders.findFirst({
           where: {
-            isDefault: true,
             departementId: connectedUser?.departement?.id,
           },
         });
         if (!defaultFolder) {
           defaultFolder = await this.prisma.folders.create({
             data: {
-              isDefault: true,
               description: '',
               title: '',
               adress: '',
