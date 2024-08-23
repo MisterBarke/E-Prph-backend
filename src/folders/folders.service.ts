@@ -54,9 +54,6 @@ export class FoldersService {
         adress: dto.adress ?? '',
         telephone: dto.telephone ?? '',
         email: dto.email ?? '',
-        isValidateBeforeSignature: connectedUser.departement.isCreditAgricole
-          ? false
-          : true,
         createdBy: {
           connect: {
             id: connectedUser.id,
@@ -72,9 +69,9 @@ export class FoldersService {
       },
     });
 
-    await this.assignSignateursToFolder(newData.id, {
+    await this.assignSignateursToFolder(newData.id,{
       signateurs: dto?.signateurs,
-    });
+    }, userId);
 
     //Update files names
     for (let i = 0; i < dto.files.length; i++) {
@@ -85,7 +82,6 @@ export class FoldersService {
         },
         data: {
           title: element.title,
-          isPrincipal: element.isPrincipal ?? false,
           folder: {
             connect: {
               id: newData.id,
@@ -103,8 +99,6 @@ export class FoldersService {
       decalage,
       dateDebut,
       dateFin,
-      isValidate,
-      isRejected = false,
     }: PaginationParams,
     userId: string,
   ) {
@@ -121,8 +115,6 @@ export class FoldersService {
       take: limit,
       where: {
         departementId: connectedUser.departement.id,
-        isValidateBeforeSignature: true,
-        isRejected,
         signateurs: {
           some: {
             userId: connectedUser.id,
@@ -145,8 +137,6 @@ export class FoldersService {
       decalage,
       dateDebut,
       dateFin,
-      isValidate = false,
-      isRejected = false,
     }: PaginationParams,
     userId: string,
   ) {
@@ -159,8 +149,7 @@ export class FoldersService {
       },
     });
     if (
-      connectedUser.role === 'ADMIN_MEMBER' &&
-      connectedUser.departement.isServiceReseau === false
+      connectedUser.role === 'ADMIN_MEMBER' 
     ) {
       return await this.prisma.folders.findMany({
         skip: +decalage,
@@ -170,54 +159,21 @@ export class FoldersService {
             id: connectedUser.id,
           },
 
-          OR: [
-            {
-              departement: {
-                isCreditAgricole: true,
-              },
-              isValidateBeforeSignature: isValidate ? true : false,
-              isRejected: isRejected ? true : false,
-              //isSigningEnded: false
-            },
-            {
-              departement: {
-                isCreditAgricole: false,
-              },
-              //signaturePosition: 0
-            },
-          ],
         },
         include: {
           documents: true,
           departement: true,
           createdBy: true,
-        },
-      });
-    }
-    if (
-      connectedUser.role === 'ADMIN_MEMBER' &&
-      connectedUser.departement.isServiceReseau === true
-    ) {
-      return await this.prisma.folders.findMany({
-        skip: +decalage,
-        take: +limit,
-        where: {
-          departement: {
-            isCreditAgricole: true,
+          signateurs: {
+            include: {
+              user: true,
+            },
           },
-          isValidateBeforeSignature: isValidate ? true : false,
-          isRejected: isRejected ? true : false,
-          //  signaturePosition: 0
-        },
-
-        include: {
-          documents: true,
-          departement: true,
-          createdBy: true,
+          signatures: true,
         },
       });
     }
-
+    
     if (connectedUser.role == 'ADMIN') {
       return await this.prisma.folders.findMany({
         skip: +decalage,
@@ -252,29 +208,7 @@ export class FoldersService {
             userId: connectedUser.id,
           },
         },
-        OR: [
-          {
-            departement: {
-              isCreditAgricole: true,
-              isFromNiamey: false,
-            },
-            isValidateBeforeSignature: true,
-            isRejected: false,
-          },
-          {
-            departement: {
-              isCreditAgricole: true,
-              isFromNiamey: true,
-            },
-            isRejected: false,
-            isValidateBeforeSignature: false,
-          },
-          {
-            departement: {
-              isCreditAgricole: false,
-            },
-          },
-        ],
+        
       },
       include: {
         documents: true,
@@ -284,6 +218,7 @@ export class FoldersService {
           },
         },
         createdBy: true,
+        signatures: true
       },
     });
   }
@@ -382,9 +317,16 @@ export class FoldersService {
     }
   }
 
-  async assignSignateursToFolder(id: string, dto: AssignSignateurDto) {
+  async assignSignateursToFolder(id: string, dto: AssignSignateurDto, userId: string,) {
     if (!dto?.signateurs || !dto?.signateurs?.length) return;
-
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        departement: true,
+      },
+    });
     const users = await this.prisma.users.findMany({
       where: {
         id: {
@@ -403,7 +345,19 @@ export class FoldersService {
         400,
       );
     }
-
+ 
+    const serviceReseauUser = dto.signateurs.map(async (userId) => {
+    let user = await this.prisma.users.findUnique({
+      where:{id: userId, departement: {isServiceReseau:true}}
+    })
+    return user
+    })
+    if (connectedUser.departement.isFromNiamey === false && !serviceReseauUser) {
+      throw new HttpException(
+       "Veuillez sélectionner un signataire du service réseau dans la liste des signataires du dossier",
+        400,
+      );
+    }
     const signateurs = await Promise.all(
       dto.signateurs.map(async (userId) => {
         let signateur = await this.prisma.signateurs.findFirst({
@@ -467,7 +421,7 @@ export class FoldersService {
     }
   }
 
-  async folderValidationByServiceReseau(
+ /*async folderValidationByServiceReseau(
     id: string,
     data: FolderValidationDto,
     userId: string,
@@ -497,7 +451,7 @@ export class FoldersService {
         ...donne,
       },
     });
-  }
+  }*/
 
   async signFolder(userId: string, folderId: string, dto: FolderSignatureDto) {
     // Find the connected user based on userId

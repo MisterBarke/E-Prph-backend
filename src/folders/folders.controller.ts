@@ -90,18 +90,15 @@ export class FoldersController {
       limit = 100,
       dateDebut,
       dateFin,
-      isRejected,
-      isValidate,
     }: PaginationParams,
     @Req() request,
   ) {
     return this.foldersService.findAll(
-      { decalage, limit, dateDebut, dateFin, isRejected, isValidate },
+      { decalage, limit, dateDebut, dateFin },
       request.user.id,
     );
   }
 
-  //get by service reseau
   @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
@@ -111,10 +108,10 @@ export class FoldersController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
   @ApiOperation({
-    operationId: 'GetAllFoldersByserviceReseau',
+    operationId: 'GetAllFoldersByAdmin',
   })
   @Get('admin_member')
-  findAllServiceReseau(
+  findAllAdminMember(
     //@Query('search') search: string,
     @Query()
     {
@@ -122,8 +119,6 @@ export class FoldersController {
       limit = 200,
       dateDebut,
       dateFin,
-      isRejected,
-      isValidate,
     }: PaginationParams,
     @Req() request,
   ) {
@@ -132,8 +127,6 @@ export class FoldersController {
       limit,
       dateDebut,
       dateFin,
-      isRejected,
-      isValidate,
     }, request.user.id);
   }
 
@@ -159,8 +152,6 @@ export class FoldersController {
       limit = 100,
       dateDebut,
       dateFin,
-      isRejected,
-      isValidate,
     }: PaginationParams,
     @Req() request,
   ) {
@@ -169,8 +160,6 @@ export class FoldersController {
       limit,
       dateDebut,
       dateFin,
-      isRejected,
-      isValidate
     }, request.user.id);
   }
 //les folders des compatables
@@ -330,51 +319,11 @@ export class FoldersController {
   assignSignateursToFolder(
     @Param('id') id: string,
     @Body() dto: AssignSignateurDto,
+    @Req() request
   ) {
-    return this.foldersService.assignSignateursToFolder(id, dto);
+    return this.foldersService.assignSignateursToFolder(id, dto, request.user.id);
   }
 
-  @ApiCreatedResponse({ description: 'Modification de Folders' })
-  @ApiResponse({
-    status: 200,
-    description: 'Folders est modifié',
-  })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
-  @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiBody({ type: FolderValidationDto })
-  @ApiOperation({
-    operationId: 'UpdateFolders',
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          encoding: {
-            about: {
-              contentType: 'application/json',
-            },
-          },
-          schema: {
-            type: 'object',
-            properties: {
-              about: { type: 'array', items: { type: 'number' } },
-            },
-          },
-        },
-      },
-    },
-  })
-  @Put(':id/service_reseau')
-  updateFolder(
-    @Param('id') id: string,
-    @Body() dto: FolderValidationDto,
-    @Req() request,
-  ) {
-    return this.foldersService.folderValidationByServiceReseau(
-      id,
-      dto,
-      request.user.id,
-    );
-  }
 
   @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({

@@ -171,16 +171,6 @@ export class PaginationParams {
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
-  isValidate?: boolean;
-
-  @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
-  isRejected?: boolean;
-
-  @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
   isSigningEnded?: boolean;
 }
 
