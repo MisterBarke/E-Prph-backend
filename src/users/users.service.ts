@@ -10,6 +10,7 @@ import {
   CreateUsersDto,
   UpdateUsersDto,
   PaginationParams,
+  pwrdEmailValidationDTO,
 } from './dto/users.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
@@ -202,5 +203,16 @@ export class UsersService {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async pwrdEmailValidation(dto:pwrdEmailValidationDTO) {
+    const user = await this.prisma.users.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+      return user
   }
 }

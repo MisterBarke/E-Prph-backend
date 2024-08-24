@@ -9,6 +9,7 @@ import {
   IsNotEmpty,
   Min,
   IsBoolean,
+  isEmail,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
@@ -104,4 +105,19 @@ export class PaginationParams {
   @Type(() => Boolean)
   @IsBoolean()
   isSignateurDossierAgricole?: boolean;
+}
+
+export class pwrdEmailValidationDTO{
+  @ApiProperty({
+    type: 'email',
+    name: 'email',
+    description: 'la propriété email de type email',
+    default: '',
+  })
+  @IsNotEmpty()
+  @IsString()
+  @IsEmail()
+  email: string
+
+
 }
