@@ -20,6 +20,18 @@ export class UploadService {
     //   },
     // );
   }
+
+  async getSingleFile(fileId: string) {
+    const file = await this.prisma.file.findUnique({
+      where: {
+        id: fileId,
+      },
+    });
+
+    if (!file) throw new HttpException('No file exist on this id', 404);
+    return file;
+  }
+
   async getFiles(userId: string) {
     const connectedUser = await this.prisma.users.findFirst({
       where: {
@@ -49,122 +61,115 @@ export class UploadService {
     signature = false,
     userId?: string,
   ) {
-    const folder = 'dossiers';
-    const name = `ph_${Math.ceil(Math.random() * 1000)}ph_${Date.now()}ph_${
-      file.originalname
-    }`;
-    const supabaseResp = await this.supabaseClient.storage
-      .from(folder)
-      .upload(name, file.buffer);
-    if (!supabaseResp.error) {
-      const url = this.supabaseClient.storage
-        .from(folder)
-        .getPublicUrl(supabaseResp.data.path).data.publicUrl;
-      if (signature) {
-        await this.prisma.users.update({
-          where: {
-            id: userId,
-          },
-          data: {
-            userSignatureUrl: url,
-          },
-        });
-      } else {
-        //set file to default folder
-        const connectedUser: any = await this.prisma.users.findFirst({
-          where: {
-            id: userId,
-          },
-          include: {
-            departement: true,
-          },
-        });
-        if (!connectedUser.departement?.id) {
-          let defaultDepartement = await this.prisma.departement.findFirst({
-            where: {
-              isDefault: true,
-            },
-          });
-          if (!defaultDepartement) {
-            defaultDepartement = await this.prisma.departement.create({
-              data: {
-                title: '',
-                isDefault: true,
-              },
-            });
-          }
-          await this.prisma.users.update({
-            where: {
-              id: connectedUser.id,
-            },
-            data: {
-              departement: {
-                connect: {
-                  id: defaultDepartement.id,
-                },
-              },
-            },
-          });
-          connectedUser['departement'] = [defaultDepartement];
-        }
-        let defaultFolder = await this.prisma.folders.findFirst({
+    const newFile = await this.prisma.file.create({
+      data: {
+        filename: file.filename,
+        mimetype: file.mimetype,
+        path: file.path,
+      },
+    });
+
+    if (signature) {
+      await this.prisma.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          userSignatureUrl: newFile.id,
+        },
+      });
+    } else {
+      //set file to default folder
+      const connectedUser: any = await this.prisma.users.findFirst({
+        where: {
+          id: userId,
+        },
+        include: {
+          departement: true,
+        },
+      });
+      if (!connectedUser.departement?.id) {
+        let defaultDepartement = await this.prisma.departement.findFirst({
           where: {
             isDefault: true,
-            departementId: connectedUser?.departement?.id,
           },
         });
-        if (!defaultFolder) {
-          defaultFolder = await this.prisma.folders.create({
+        if (!defaultDepartement) {
+          defaultDepartement = await this.prisma.departement.create({
             data: {
-              isDefault: true,
-              description: '',
               title: '',
-              adress: '',
-              departement: {
-                connect: {
-                  id: connectedUser?.departement?.id,
-                },
-              },
-              email: '',
-              telephone: '',
-              nom: '',
-              createdBy: {
-                connect: {
-                  id: connectedUser?.id,
-                },
-              },
+              isDefault: true,
             },
           });
         }
-
-        const newDocument = await this.prisma.documents.create({
+        await this.prisma.users.update({
+          where: {
+            id: connectedUser.id,
+          },
           data: {
-            title: file.originalname,
-            url,
-            folder: {
+            departement: {
               connect: {
-                id: defaultFolder.id,
-              },
-            },
-            createdBy: {
-              connect: {
-                id: connectedUser.id,
+                id: defaultDepartement.id,
               },
             },
           },
         });
-
-        return newDocument;
+        connectedUser['departement'] = [defaultDepartement];
+      }
+      let defaultFolder = await this.prisma.folders.findFirst({
+        where: {
+          isDefault: true,
+          departementId: connectedUser?.departement?.id,
+        },
+      });
+      if (!defaultFolder) {
+        defaultFolder = await this.prisma.folders.create({
+          data: {
+            isDefault: true,
+            description: '',
+            title: '',
+            adress: '',
+            departement: {
+              connect: {
+                id: connectedUser?.departement?.id,
+              },
+            },
+            email: '',
+            telephone: '',
+            nom: '',
+            createdBy: {
+              connect: {
+                id: connectedUser?.id,
+              },
+            },
+          },
+        });
       }
 
-      return {
-        ...supabaseResp.data,
-        url,
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-      };
+      const newDocument = await this.prisma.documents.create({
+        data: {
+          title: file.originalname,
+          url: newFile.id,
+          folder: {
+            connect: {
+              id: defaultFolder.id,
+            },
+          },
+          createdBy: {
+            connect: {
+              id: connectedUser.id,
+            },
+          },
+        },
+      });
+
+      return newDocument;
     }
 
-    return supabaseResp.error;
+    return {
+      url: newFile.id,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+    };
   }
 }

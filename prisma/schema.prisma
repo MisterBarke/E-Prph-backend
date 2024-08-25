@@ -46,6 +46,13 @@ model Documents {
   updatedAt  DateTime     @updatedAt
 }
 
+model File {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  filename String
+  path String
+  mimetype String
+}
+
 model Departement {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
   title      String

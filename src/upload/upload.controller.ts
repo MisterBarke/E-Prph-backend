@@ -1,9 +1,12 @@
 import {
   Controller,
   Get,
+  Param,
   Post,
   Query,
   Req,
+  Res,
+  StreamableFile,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -11,6 +14,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { diskStorage } from 'multer';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import { Response } from 'express';
 
 @Controller('upload')
 export class UploadController {
@@ -46,6 +52,24 @@ export class UploadController {
   ) {
     const user = request.user;
     return this.uploadService.getFiles(user.id);
+  }
+
+  @Get('files/:id')
+  public async getSingleFile(
+    // @Query('type') fileType: string,
+    @Param('id') id: string,
+    @Req() request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const user = request.user;
+    const file = await this.uploadService.getSingleFile(user.id);
+    const stream = createReadStream(join(process.cwd(), file.path));
+
+    response.set({
+      'Content-Disposition': `inline; filename="${file.filename}"`,
+      'Content-Type': file.mimetype,
+    });
+    return new StreamableFile(stream);
   }
 
   @Post('signature')
