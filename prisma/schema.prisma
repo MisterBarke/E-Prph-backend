@@ -30,6 +30,7 @@ model Users {
   isPasswordInit Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  isPasswordForgotten Boolean @default(false)
 }
 
 model Documents {

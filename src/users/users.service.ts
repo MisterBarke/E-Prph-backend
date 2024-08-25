@@ -197,7 +197,10 @@ export class UsersService {
     try {
       const changePwd = await this.prisma.users.update({
         where: { id },
-        data: { isPasswordInit: false },
+        data: {
+          isPasswordInit: false,
+          isPasswordForgotten: true
+         },
       });
       return changePwd;
     } catch (error) {
