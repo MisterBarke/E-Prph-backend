@@ -272,7 +272,7 @@ export class UsersController {
       },
     },
   })
-  @Get('/forgot_password/email')
+  @Get('forgot_password/email')
   forgotPasswordEmailValidation(@Body() dto: pwrdEmailValidationDTO) {
     return this.usersService.pwrdEmailValidation(dto);
   }
