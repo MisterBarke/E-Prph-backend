@@ -35,24 +35,24 @@ export class AuthController {
   @ApiBearerAuth()
   @Roles('SUDO')
   @Post('register/admin/by_super_admin')
-  register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto, Role.ADMIN);
+  register(@Body() registerDto: RegisterDto,  @Req() request) {
+    return this.authService.register(registerDto, Role.ADMIN, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
   }
 
   @ApiBearerAuth()
   @Roles('ADMIN')
   @Post('register/group_admin/by_admin')
-  registeAdminMember(@Body() registerDto: RegisterDto) {
+  registeAdminMember(@Body() registerDto: RegisterDto, @Req() request) {
     if (!registerDto.departementName)
       throw new HttpException('veuiller ajouter le nom du departement', 400);
-    return this.authService.register(registerDto, Role.ADMIN_MEMBER);
+    return this.authService.register(registerDto, Role.ADMIN_MEMBER, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
   }
 
   @ApiBearerAuth()
   @Roles('ADMIN_MEMBER')
   @Post('register')
   registerMember(@Body() registerDto: RegisterDto, @Req() request) {
-    return this.authService.register(registerDto, 'MEMBER', request.user.id);
+    return this.authService.register(registerDto, Role.MEMBER, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
   }
 
   @ApiBearerAuth()

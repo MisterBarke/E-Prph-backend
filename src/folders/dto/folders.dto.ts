@@ -33,16 +33,6 @@ class FileDto {
   @IsString()
   @IsNotEmpty()
   title: string;
-
-  @ApiProperty({
-    type: 'boolean',
-    name: 'isPrincipal',
-    description: 'la propriété isPrincipal de type string',
-    default: false,
-  })
-  @IsBoolean()
-  @IsOptional()
-  isPrincipal: boolean;
 }
 
 export class AssignSignateurDto {
@@ -143,6 +133,54 @@ export class CreateFoldersDto {
   email: string;
 }
 
+export class CreateClientsFoldersDto {
+  @IsNotEmpty()
+  files: ClientFileDto[];
+
+  @ApiProperty({
+    type: 'string',
+    name: 'title',
+    description: 'la propriété title de type string',
+    default: 'lorem ipsum',
+  })
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'description',
+    description: 'la propriété description de type string',
+    default: 'lorem ipsum',
+  })
+  @IsString()
+  @IsOptional()
+  description: string;
+}
+
+class ClientFileDto {
+  @ApiProperty({
+    type: 'string',
+    name: 'id',
+    description: 'la propriété id de type string',
+    default: 'lorem ipsum',
+  })
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'title',
+    description: 'la propriété title de type string',
+    default: 'lorem ipsum',
+  })
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+}
+
+export class UpdateClientsFoldersDto extends PartialType(CreateClientsFoldersDto) {}
 export class UpdateFoldersDto extends PartialType(CreateFoldersDto) {}
 
 export class PaginationParams {

@@ -19,6 +19,7 @@ import { MailService } from 'src/mail/mail.service';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import axios from 'axios';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +31,16 @@ export class AuthService {
     private jwtService: JwtService,
   ) {
  
+  }
+  private async getLocation(ip: string): Promise<string> {
+    try {
+      const response = await axios.get(`http://ip-api.com/json/${ip}?fields=city,regionName`);
+      const { city, regionName } = response.data;
+      return `${city}, ${regionName}`;
+    } catch (error) {
+      console.error('Error fetching location:', error);
+      return 'Unknown location';
+    }
   }
 
   async retreiveNewSession({ refresh_token }: RefreshTokenDto) {
@@ -136,6 +147,7 @@ export class AuthService {
       isFromNiamey,
     }: RegisterDto,
     role: Role = Role.MEMBER,
+    location,
     userId?: string,
   ) {
     const retreiveUser = await this.prisma.users.findUnique({
@@ -155,6 +167,7 @@ export class AuthService {
         phone: '',
         role,
         password: hash,
+        location
       },
     });
 

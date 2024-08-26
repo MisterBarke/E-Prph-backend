@@ -27,14 +27,16 @@ import {
   AssignSignateurDto,
   FolderSignatureDto,
   FolderVisibilityByAccountantDto,
+  CreateClientsFoldersDto,
+  UpdateClientsFoldersDto,
 } from './dto/folders.dto';
 import { request } from 'http';
+import { ClientsFoldersService } from './clientsFolders.service';
 
 @ApiTags('folders')
 @Controller('folders')
 export class FoldersController {
-  constructor(private foldersService: FoldersService) {}
-
+  constructor(private foldersService: FoldersService, private clientsFoldersService: ClientsFoldersService) {}
   @ApiCreatedResponse({ description: 'Créer un nouveau Folders' })
   @ApiResponse({
     status: 201,
@@ -377,5 +379,119 @@ export class FoldersController {
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.foldersService.delete(id);
+  }
+  //CLIENT OPERATIONS
+
+  @ApiCreatedResponse({ description: 'Créer un nouveau Folder client' })
+  @ApiResponse({
+    status: 201,
+    description: 'Folder est crée',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: CreateClientsFoldersDto })
+  @ApiOperation({
+    operationId: 'CreateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Post('client')
+  createClientFolder(@Body() dto: CreateClientsFoldersDto, @Req() request) {
+    return this.clientsFoldersService.create(dto, request.user.id);
+  }
+
+  @ApiCreatedResponse({ description: 'Tous les Folders des clients' })
+  @ApiResponse({
+    status: 200,
+    description: 'Les Folders sont retrouvés',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'GetAllFolders',
+  })
+  @Get('client')
+  findAllClientsFolders(
+    //@Query('search') search: string,
+    @Query()
+    {
+      decalage = 0,
+      limit = 100,
+      dateDebut,
+      dateFin,
+    }: PaginationParams,
+    @Req() request,
+  ) {
+    return this.clientsFoldersService.findAll(
+      { decalage, limit, dateDebut, dateFin },
+      request.user.id,
+    );
+  }
+
+  @ApiCreatedResponse({ description: 'Modification de Folders des clients' })
+  @ApiResponse({
+    status: 200,
+    description: 'Folders est modifié',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: UpdateClientsFoldersDto })
+  @ApiOperation({
+    operationId: 'UpdateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Put(':id/client')
+  updateClientFolder(@Param('id') id: string, @Body() dto: UpdateClientsFoldersDto) {
+    return this.clientsFoldersService.update(id, dto);
+  }
+
+  @ApiCreatedResponse({ description: 'Supprimer Folders' })
+  @ApiResponse({
+    status: 200,
+    description: 'Le Folders est suprimé',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found, le id est introuvable' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'SoftDeleteFolders',
+  })
+  @Delete(':id/client')
+  deleteClientFolder(@Param('id') id: string) {
+    return this.clientsFoldersService.delete(id);
   }
 }

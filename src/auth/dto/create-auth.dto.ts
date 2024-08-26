@@ -47,6 +47,16 @@ export class RegisterDto {
 
   @ApiProperty({
     type: 'string',
+    name: 'location',
+    description: 'la propriété location de type string',
+    default: 'companysoftart@gmail.com',
+  })
+  @IsString()
+  @IsNotEmpty()
+  location: string;
+
+  @ApiProperty({
+    type: 'string',
     name: 'departementName',
     description: 'la propriété departementName de type string',
     default: '',

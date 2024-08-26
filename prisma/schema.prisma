@@ -8,9 +8,9 @@ datasource db {
 }
 
 model Users {
-  id                         String       @id @default(auto()) @map("_id") @db.ObjectId
-  email                      String       @unique
-  password                   String       @default("")
+  id                         String           @id @default(auto()) @map("_id") @db.ObjectId
+  email                      String           @unique
+  password                   String           @default("")
   refresh_token              String?
   // supabase_id    String       @unique
   phone                      String
@@ -18,57 +18,38 @@ model Users {
   position                   String?
   name                       String?
   userSignatureUrl           String?
-  isSignateurDossierAgricole Boolean      @default(false)
+  isSignateurDossierAgricole Boolean          @default(false)
   role                       Role
-  signatures                 Signatures[] @relation("signatures")
-  signateursRole             Signateurs[] @relation("signateurs")
+  signatures                 Signatures[]     @relation("signatures")
+  signateursRole             Signateurs[]     @relation("signateurs")
   // departementChef Departement[]  @relation("departementChefRelation")
-  departement                Departement? @relation("departements", fields: [departementId], references: [id])
-  departementId              String?      @db.ObjectId
+  departement                Departement?     @relation("departements", fields: [departementId], references: [id])
+  departementId              String?          @db.ObjectId
   folders                    Folders[]
   documents                  Documents[]
-  isPasswordInit             Boolean      @default(false)
-  createdAt                  DateTime     @default(now())
-  updatedAt                  DateTime     @updatedAt
-  isPasswordForgotten        Boolean      @default(false)
-}
-
-model ClientUser {
-  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
-  email               String      @unique
-  password            String      @default("")
-  refresh_token       String?
-  phone               String
-  name                String?
-  role                Role
-  folders             Folders[]
-  documents           Documents[]
-  isPasswordInit      Boolean     @default(false)
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
-  isPasswordForgotten Boolean     @default(false)
+  isPasswordInit             Boolean          @default(false)
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime         @updatedAt
+  isPasswordForgotten        Boolean          @default(false)
+  location                   String?
 }
 
 model Documents {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
-  url          String
-  title        String
-  createdBy    Users       @relation(fields: [createdById], references: [id])
-  createdById  String      @db.ObjectId
-  isPrincipal  Boolean     @default(false)
-  folder       Folders     @relation(fields: [folderId], references: [id])
-  folderId     String      @db.ObjectId
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  ClientUser   ClientUser? @relation(fields: [clientUserId], references: [id])
-  clientUserId String?     @db.ObjectId
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  url              String
+  title            String
+  createdBy        Users           @relation(fields: [createdById], references: [id])
+  createdById      String          @db.ObjectId
+  folder           Folders         @relation(fields: [folderId], references: [id])
+  folderId         String          @db.ObjectId
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
+
 
 model Departement {
   id               String    @id @default(auto()) @map("_id") @db.ObjectId
   title            String
-  // chefDepartement       Users     @relation("departementChefRelation", fields: [chefDepartementId], references: [id])
-  // chefDepartementId     String    @db.ObjectId
   users            Users[]   @relation("departements")
   isCreditAgricole Boolean   @default(false)
   isServiceReseau  Boolean   @default(false)
@@ -101,21 +82,6 @@ model Folders {
   isSigningEnded        Boolean      @default(false)
   isVisibleByAccountant Boolean      @default(false)
   number                Int?
-  ClientUser            ClientUser?  @relation(fields: [clientUserId], references: [id])
-  clientUserId          String?      @db.ObjectId
-}
-
-model ClientsFolders {
-  id                    String       @id @default(auto()) @map("_id") @db.ObjectId
-  title                 String
-  description           String
-  createdBy             Users        @relation(fields: [createdById], references: [id])
-  createdById           String       @db.ObjectId
-  documents             Documents[]
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
-  ClientUser            ClientUser?  @relation(fields: [clientUserId], references: [id])
-  clientUserId          String?      @db.ObjectId
 }
 
 //Definis les signateurs pour un dossier
@@ -140,6 +106,45 @@ model Signatures {
   signedAt    DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model ClientUser {
+  id                  String           @id @default(auto()) @map("_id") @db.ObjectId
+  email               String           @unique
+  password            String           @default("")
+  refresh_token       String?
+  phone               String
+  name                String?
+  role                Role
+  clientsFolders             ClientsFolders[]
+  documents           ClientsDocuments[]
+  isPasswordInit      Boolean          @default(false)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  isPasswordForgotten Boolean          @default(false)
+}
+
+model ClientsFolders {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  createdByClient    ClientUser       @relation(fields: [createdByClientId], references: [id])
+  createdByClientId  String      @db.ObjectId
+  documents    ClientsDocuments[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model ClientsDocuments {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  url              String
+  title            String
+  createdByClient        ClientUser           @relation(fields: [createdByClientId], references: [id])
+  createdByClientId      String          @db.ObjectId
+  clientsFolders           ClientsFolders         @relation(fields: [folderId], references: [id])
+  folderId         String          @db.ObjectId
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 enum Role {

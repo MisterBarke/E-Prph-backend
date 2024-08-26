@@ -1,58 +1,35 @@
 import {
     Injectable,
+    NotFoundException,
   } from '@nestjs/common';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateFoldersDto, PaginationParams } from './dto/folders.dto';
+import { CreateClientsFoldersDto, PaginationParams, UpdateClientsFoldersDto } from './dto/folders.dto';
 
 @Injectable()
-export class FoldersService {
+export class ClientsFoldersService {
   constructor(
     private prisma: PrismaService,
     private mailService: MailService,
   ) {}
 
-  async create(dto: CreateFoldersDto, userId: string) {
-    const connectedUser = await this.prisma.users.findUnique({
+  async create(dto: CreateClientsFoldersDto, userId: string, userIp:string) {
+    const connectedUser = await this.prisma.clientUser.findUnique({
       where: {
         id: userId,
       },
-      include: {
-        departement: true,
-      },
     });
 
-    const highestNumber = await this.prisma.folders.findFirst({
-      orderBy: {
-        number: 'desc',
-      },
-      select: {
-        number: true,
-      },
-    });
-
-    const newNumber = highestNumber ? highestNumber.number + 1 : 1;
-
-    const newData = await this.prisma.folders.create({
+    const newData = await this.prisma.clientsFolders
+    .create({
       data: {
         title: dto.title,
         description: dto.description ?? '',
-        nom: dto.nom ?? '',
-        adress: dto.adress ?? '',
-        telephone: dto.telephone ?? '',
-        email: dto.email ?? '',
-        createdBy: {
+        createdByClient: {
           connect: {
             id: connectedUser.id,
           },
         },
-        departement: {
-          connect: {
-            id: connectedUser.departement.id,
-            title: connectedUser.departement.title,
-          },
-        },
-        number: newNumber,
       },
     });
 
@@ -60,13 +37,13 @@ export class FoldersService {
     //Update files names
     for (let i = 0; i < dto.files.length; i++) {
       const element = dto.files[i];
-      await this.prisma.documents.update({
+      await this.prisma.clientsDocuments.update({
         where: {
           id: element.id,
         },
         data: {
           title: element.title,
-          folder: {
+          clientsFolders: {
             connect: {
               id: newData.id,
             },
@@ -80,37 +57,61 @@ export class FoldersService {
   async findAll(
     {
       limit,
-      decalage,
-      dateDebut,
-      dateFin,
+      decalage
     }: PaginationParams,
     userId: string,
   ) {
-    const connectedUser = await this.prisma.users.findUnique({
+    const connectedUser = await this.prisma.clientUser.findUnique({
       where: {
         id: userId,
       },
-      include: {
-        departement: true,
-      },
     });
-    return await this.prisma.folders.findMany({
+    return await this.prisma.clientsFolders.findMany({
       skip: decalage,
       take: limit,
       where: {
-        departementId: connectedUser.departement.id,
-        signateurs: {
-          some: {
-            userId: connectedUser.id,
-          },
-        },
+        createdByClient:{
+          id: connectedUser.id
+        }
       },
       include: {
-        createdBy: true,
-        signateurs: true,
-        signatures: true,
-        departement: true,
-        documents: true,
+        createdByClient: true,
+        documents: true
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    return await this.prisma.clientsFolders.findUnique({
+      where: { id },
+      include: {
+        createdByClient: true,
+        documents: true
+      },
+    });
+  }
+
+  async delete(id: string) {
+    // Supprimer les documents associés au dossier
+    await this.prisma.clientsDocuments.deleteMany({
+      where: { folderId: id },
+    });
+
+    // Supprimer le dossier
+    const deletedFolder = await this.prisma.clientsFolders.delete({
+      where: { id },
+    });
+    return deletedFolder;
+  }
+
+  async update(id:string, dto: UpdateClientsFoldersDto) {
+    const data = await this.findOne(id);
+    if (!data) throw new NotFoundException("L'identifiant id n'existe pas");
+    return await this.prisma.clientsFolders.update({
+      where: { id },
+      data: {
+        title: dto.title ?? data.title,
+        description: dto.description ?? data.description,
       },
     });
   }
