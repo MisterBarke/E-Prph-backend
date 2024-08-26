@@ -8,6 +8,7 @@ import {
 import {
   LoginDto,
   RefreshTokenDto,
+  RegisterClientDto,
   RegisterDto,
   updatePasswordDto,
 } from './dto/create-auth.dto';
@@ -233,5 +234,49 @@ export class AuthService {
 
     return newUser;
    
+  }
+
+  async registerClient(
+    {
+      email,
+      password
+    }: RegisterClientDto,
+    role: Role = Role.CLIENT
+  ) {
+    const retreiveUser = await this.prisma.users.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (retreiveUser) throw new HttpException('User already exist', 409);
+
+    const saltOrRounds = 10;
+    const hash = await bcrypt.hash(password, saltOrRounds);
+    const newUser = await this.prisma.clientUser.create({
+      data: {
+        email,
+        phone: '',
+        role,
+        password: hash,
+      },
+    });
+
+    await this.mailService.sendMail({
+      companyContry: 'Niger',
+      companyName: 'BAGRI',
+      email,
+      subject: 'Informations de connexions',
+      template: 'credential',
+      title:
+        'Bienvenue au Parapheur de BAGRI, Veuiller Vous connecter avec le mot de passe',
+      context: {
+        username: email.split('@')[0].split('.').join(' '),
+        companyName: 'BAGRI',
+        password,
+      },
+    });
+
+    return newUser;
   }
 }

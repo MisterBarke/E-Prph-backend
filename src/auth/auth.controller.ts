@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 import {
   LoginDto,
   RefreshTokenDto,
+  RegisterClientDto,
   RegisterDto,
   updatePasswordDto,
 } from './dto/create-auth.dto';
@@ -32,7 +33,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  //@Roles('SUDO')
+  @Roles('SUDO')
   @Post('register/admin/by_super_admin')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto, Role.ADMIN);
@@ -52,6 +53,15 @@ export class AuthController {
   @Post('register')
   registerMember(@Body() registerDto: RegisterDto, @Req() request) {
     return this.authService.register(registerDto, 'MEMBER', request.user.id);
+  }
+
+  @ApiBearerAuth()
+  @Roles('CLIENT')
+  @Post('register/by_client')
+  registerClient(@Body() registerClientDto: RegisterClientDto) {
+    if (!registerClientDto.phone)
+      throw new HttpException('veuiller ajouter votre numero de telephone', 400);
+    return this.authService.registerClient(registerClientDto, Role.CLIENT);
   }
 
   @Post('password/update')

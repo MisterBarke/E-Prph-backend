@@ -26,7 +26,7 @@ export class LoginDto {
     type: 'string',
     name: 'password',
     description: 'la propriété password de type string',
-    default: '123456',
+    default: '',
   })
   @IsString()
   @IsNotEmpty()
@@ -124,6 +124,50 @@ export class RegisterDto {
   @IsBoolean()
   @IsOptional()
   isFromNiamey: boolean;
+}
+
+export class RegisterClientDto {
+  @ApiProperty({
+    type: 'string',
+    name: 'email',
+    description: 'la propriété email de type string',
+    default: '',
+  })
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'password',
+    description: 'la propriété password de type string',
+    default: '',
+  })
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'phone',
+    description: 'la propriété phone de type string',
+    default: '',
+  })
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'addresse',
+    description: 'la propriété addresse de type string',
+    default: '',
+  })
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  address: string;
 }
 
 export class updatePasswordDto {
