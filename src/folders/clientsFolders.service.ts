@@ -77,7 +77,7 @@ export class ClientsFoldersService {
             }
           },
           {
-            viwers: {
+            viewers: {
               some: {
                 id: connectedUser.id,
               },
