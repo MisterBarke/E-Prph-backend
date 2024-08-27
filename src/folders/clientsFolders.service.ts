@@ -4,7 +4,7 @@ import {
   } from '@nestjs/common';
 import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateClientsFoldersDto, PaginationParams, UpdateClientsFoldersDto } from './dto/folders.dto';
+import { AddViewersDto, CreateClientsFoldersDto, PaginationParams, UpdateClientsFoldersDto } from './dto/folders.dto';
 
 @Injectable()
 export class ClientsFoldersService {
@@ -13,7 +13,7 @@ export class ClientsFoldersService {
     private mailService: MailService,
   ) {}
 
-  async create(dto: CreateClientsFoldersDto, userId: string, userIp:string) {
+  async create(dto: CreateClientsFoldersDto, userId: string) {
     const connectedUser = await this.prisma.clientUser.findUnique({
       where: {
         id: userId,
@@ -70,15 +70,48 @@ export class ClientsFoldersService {
       skip: decalage,
       take: limit,
       where: {
-        createdByClient:{
-          id: connectedUser.id
-        }
+        OR:[
+          {
+            createdByClient:{
+              id: connectedUser.id
+            }
+          },
+          {
+            viwers: {
+              some: {
+                id: connectedUser.id,
+              },
+            },
+          }
+        ]
       },
       include: {
         createdByClient: true,
         documents: true
       },
     });
+  }
+
+  async addViewersToFolder(folderId: string, addViewersDto: AddViewersDto) {
+    const { viewers } = addViewersDto;
+    const existingUsers = await this.prisma.users.findMany({
+      where: {
+        id: { in: viewers },
+      },
+    });
+
+    const existingUserIds = existingUsers.map(user => user.id);
+
+   await this.prisma.clientsFolders.update({
+      where: { id: folderId },
+      data: {
+        viewers: {
+          connect: existingUserIds.map(id => ({ id })),
+        },
+      },
+    });
+
+    return { message: 'Viewers added successfully' };
   }
 
   async findOne(id: string) {

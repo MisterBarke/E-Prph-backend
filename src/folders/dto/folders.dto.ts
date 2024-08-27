@@ -40,6 +40,11 @@ export class AssignSignateurDto {
   signateurs: string[];
 }
 
+export class AddViewersDto {
+  @IsNotEmpty()
+  viewers: string[];
+}
+
 export class FolderValidationDto {
   @ApiProperty({
     type: 'boolean',

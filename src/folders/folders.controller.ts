@@ -29,6 +29,7 @@ import {
   FolderVisibilityByAccountantDto,
   CreateClientsFoldersDto,
   UpdateClientsFoldersDto,
+  AddViewersDto,
 } from './dto/folders.dto';
 import { request } from 'http';
 import { ClientsFoldersService } from './clientsFolders.service';
@@ -478,6 +479,44 @@ export class FoldersController {
   updateClientFolder(@Param('id') id: string, @Body() dto: UpdateClientsFoldersDto) {
     return this.clientsFoldersService.update(id, dto);
   }
+
+  @ApiCreatedResponse({ description: 'Modification de Folders des clients' })
+  @ApiResponse({
+    status: 200,
+    description: 'Folders est modifié',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: UpdateClientsFoldersDto })
+  @ApiOperation({
+    operationId: 'UpdateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Put(':id/viewers')
+  async addViewers(@Param('id') folderId: string,
+    @Body() addViewersDto: AddViewersDto,
+  ) {
+    return this.clientsFoldersService.addViewersToFolder(folderId, addViewersDto);
+  }
+
+
 
   @ApiCreatedResponse({ description: 'Supprimer Folders' })
   @ApiResponse({
