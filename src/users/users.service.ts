@@ -208,14 +208,4 @@ export class UsersService {
     }
   }
 
-  async pwrdEmailValidation(dto:pwrdEmailValidationDTO) {
-    const user = await this.prisma.users.findUnique({
-      where: { email: dto.email },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-      return user
-  }
 }

@@ -243,37 +243,5 @@ export class UsersController {
     return this.usersService.forgotPassword(id);
   }
 
-  @ApiCreatedResponse({ description: 'Mot de passe oublie, verification email' })
-  @ApiResponse({
-    status: 200,
-    description: 'Verification terrminer',
-  })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
-  @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiBody({ type: UpdateUsersDto })
-  @ApiOperation({
-    operationId: 'user validation du email',
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          encoding: {
-            about: {
-              contentType: 'application/json',
-            },
-          },
-          schema: {
-            type: 'object',
-            properties: {
-              about: { type: 'array', items: { type: 'number' } },
-            },
-          },
-        },
-      },
-    },
-  })
-  @Get('forgot_password/email')
-  forgotPasswordEmailValidation(@Body() dto: pwrdEmailValidationDTO) {
-    return this.usersService.pwrdEmailValidation(dto);
-  }
+
 }

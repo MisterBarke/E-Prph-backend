@@ -20,6 +20,7 @@ import { Public } from './decorators/public.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from './decorators/role.decorator';
 import { Role } from '@prisma/client';
+import { pwrdEmailValidationDTO } from 'src/users/dto/users.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -65,5 +66,39 @@ export class AuthController {
   @Public()
   refreshToken(@Body() data: RefreshTokenDto) {
     return this.authService.retreiveNewSession(data);
+  }
+
+  @ApiCreatedResponse({ description: 'Mot de passe oublie, verification email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification terrminer',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: UpdateUsersDto })
+  @ApiOperation({
+    operationId: 'user validation du email',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Post('forgot_password/email')
+  forgotPasswordEmailValidation(@Body() dto: pwrdEmailValidationDTO) {
+    return this.authService.pwrdEmailValidation(dto);
   }
 }

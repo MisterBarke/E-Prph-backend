@@ -3,6 +3,7 @@ import {
   HttpException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -18,6 +19,7 @@ import { MailService } from 'src/mail/mail.service';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { pwrdEmailValidationDTO } from 'src/users/dto/users.dto';
 
 @Injectable()
 export class AuthService {
@@ -233,5 +235,16 @@ export class AuthService {
 
     return newUser;
    
+  }
+
+  async pwrdEmailValidation(dto:pwrdEmailValidationDTO) {
+    const user = await this.prisma.users.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+      return user
   }
 }
