@@ -21,6 +21,7 @@ import { Public } from './decorators/public.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from './decorators/role.decorator';
 import { Role } from '@prisma/client';
+import { pwrdEmailValidationDTO } from 'src/users/dto/users.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -75,5 +76,12 @@ export class AuthController {
   @Public()
   refreshToken(@Body() data: RefreshTokenDto) {
     return this.authService.retreiveNewSession(data);
+  }
+
+
+  @Public()
+  @Post('forgot_password/email')
+  forgotPasswordEmailValidation(@Body() dto: pwrdEmailValidationDTO) {
+    return this.authService.pwrdEmailValidation(dto);
   }
 }
