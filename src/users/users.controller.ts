@@ -242,6 +242,4 @@ export class UsersController {
   ) {
     return this.usersService.forgotPassword(id);
   }
-
-
 }
