@@ -254,7 +254,8 @@ export class AuthService {
       email,
       password
     }: RegisterClientDto,
-    role: Role = Role.CLIENT
+    role: Role = Role.CLIENT,
+    location
   ) {
     const retreiveUser = await this.prisma.users.findUnique({
       where: {
@@ -271,6 +272,7 @@ export class AuthService {
         email,
         phone: '',
         role,
+        location,
         password: hash,
       },
     });

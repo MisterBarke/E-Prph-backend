@@ -58,10 +58,10 @@ export class AuthController {
   @ApiBearerAuth()
   @Roles('CLIENT')
   @Post('register/by_client')
-  registerClient(@Body() registerClientDto: RegisterClientDto) {
+  registerClient(@Body() registerClientDto: RegisterClientDto, @Req() request) {
     if (!registerClientDto.phone)
       throw new HttpException('veuiller ajouter votre numero de telephone', 400);
-    return this.authService.registerClient(registerClientDto, Role.CLIENT);
+    return this.authService.registerClient(registerClientDto, Role.CLIENT, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
   }
 
   @Post('password/update')
