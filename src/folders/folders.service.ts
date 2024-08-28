@@ -555,24 +555,31 @@ export class FoldersService {
   }
 
   async findOne(id: string) {
-    return await this.prisma.folders.findUnique({
-      where: { id },
-      include: {
-        createdBy: true,
-        signateurs: {
-          include: {
-            user: true,
+    console.log(id);
+    try {
+      return await this.prisma.folders.findUnique({
+        where: { id },
+        include: {
+          createdBy: true,
+          signateurs: {
+            include: {
+              user: true,
+            },
           },
-        },
-        signatures: {
-          include: {
-            user: true,
+          signatures: {
+            include: {
+              user: true,
+            },
           },
+          departement: true,
+          documents: true,
         },
-        departement: true,
-        documents: true,
-      },
-    });
+      });
+    } catch (error) {
+      console.log(error);
+      
+    }
+    
   }
 
   async update(id, dto: UpdateFoldersDto) {
