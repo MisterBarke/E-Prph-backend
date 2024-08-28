@@ -381,6 +381,8 @@ export class FoldersController {
   delete(@Param('id') id: string) {
     return this.foldersService.delete(id);
   }
+
+
   //CLIENT OPERATIONS
 
   @ApiCreatedResponse({ description: 'Créer un nouveau Folder client' })
@@ -426,7 +428,7 @@ export class FoldersController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
   @ApiOperation({
-    operationId: 'GetAllFolders',
+    operationId: 'GetAllClientFolders',
   })
   @Get('client')
   findAllClientsFolders(

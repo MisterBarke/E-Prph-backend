@@ -66,15 +66,15 @@ export class ClientsFoldersService {
         id: userId,
       },
     });
+    console.log(connectedUser);
     return await this.prisma.clientsFolders.findMany({
       skip: decalage,
       take: limit,
       where: {
-        OR:[
+        createdByClientId: connectedUser.id
+        /* OR:[
           {
-            createdByClient:{
-              id: connectedUser.id
-            }
+            createdByClientId: connectedUser.id
           },
           {
             viewers: {
@@ -83,7 +83,7 @@ export class ClientsFoldersService {
               },
             },
           }
-        ]
+        ] */
       },
       include: {
         createdByClient: true,
