@@ -33,6 +33,12 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Public()
+  @Post('login/client')
+  signClient(@Body() loginDto: LoginDto) {
+    return this.authService.clientLogin(loginDto);
+  }
+
   @ApiBearerAuth()
   @Roles('SUDO')
   @Post('register/admin/by_super_admin')
@@ -56,8 +62,7 @@ export class AuthController {
     return this.authService.register(registerDto, Role.MEMBER, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
   }
 
-  @ApiBearerAuth()
-  @Roles('CLIENT')
+  @Public()
   @Post('register/by_client')
   registerClient(@Body() registerClientDto: RegisterClientDto, @Req() request) {
     if (!registerClientDto.phone)
@@ -66,7 +71,7 @@ export class AuthController {
   }
 
   @Post('password/update')
-  @ApiBearerAuth()
+  @Public()
   updatePassword(@Body() data: updatePasswordDto, @Req() request) {
     return this.authService.updatePassword(request.user.id, data);
   }

@@ -39,6 +39,29 @@ export class UploadController {
     return this.uploadService.uploadFile(file, false, user.id);
   }
 
+  @Post('file/client')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './storage',
+        filename: (req, file, callback) => {
+          const name = `ph_${Math.ceil(
+            Math.random() * 1000,
+          )}ph_${Date.now()}ph_${file.originalname}`;
+          return callback(null, name);
+        },
+      }),
+    }),
+  )
+  public async uploadClientFile(
+    @UploadedFile() file,
+    // @Query('type') fileType: string,
+    @Req() request,
+  ) {
+    const user = request.user;
+    return this.uploadService.uploadClientFile(file,user.id);
+  }
+
   @Get('files')
   public async getFiles(
     // @Query('type') fileType: string,

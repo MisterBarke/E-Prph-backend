@@ -11,6 +11,7 @@ import {
   RefreshTokenDto,
   RegisterClientDto,
   RegisterDto,
+  updateForgottenPasswordDto,
   updatePasswordDto,
 } from './dto/create-auth.dto';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
@@ -58,18 +59,30 @@ export class AuthService {
     const res = await this.signJwt(user.id, rest);
     return res;
   }
-  async updatePassword(id: string, { password }: updatePasswordDto) {
+  async updatePassword(id: string | undefined, updatePasswordDto: updatePasswordDto) {
+    const { userId, password } = updatePasswordDto;
+
+    if (!id && !userId) {
+      throw new BadRequestException('id not provided');
+    }
+    const userIdentifier = userId || id;
+    if (!userIdentifier) {
+      throw new UnauthorizedException('No valid user identifier provided');
+    }
     const user = await this.prisma.users.findUnique({
       where: {
-        id,
+        id: userIdentifier,
       },
     });
-    if (!user) throw new UnauthorizedException();
+
+    if (!user) throw new UnauthorizedException('User not found');
+
     const saltOrRounds = 10;
     const hash = await bcrypt.hash(password, saltOrRounds);
+
     await this.prisma.users.update({
       where: {
-        id,
+        id: userIdentifier,
       },
       data: {
         isPasswordInit: true,
@@ -77,6 +90,7 @@ export class AuthService {
       },
     });
   }
+
 
   async validateUser(email: string, password: string) {
     const user = await this.prisma.users.findFirst({
@@ -97,13 +111,29 @@ export class AuthService {
     return null;
   }
 
+  async validateClient(email: string, password: string) {
+    const user = await this.prisma.clientUser.findFirst({
+      where: {
+        email,
+      },
+    });
+    if (user) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        const { password, ...result } = user;
+        return result;
+      }
+    }
+    return null;
+  }
+
   async signJwt(userId: string, payload) {
     const data = {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign({ userId }, { expiresIn: '1d' }),
     };
     const r = this.jwtService.decode(data.access_token);
-    await this.prisma.users.update({
+    await this.prisma.clientUser.update({
       where: {
         id: userId,
       },
@@ -116,6 +146,17 @@ export class AuthService {
 
   async login({ email, password }: LoginDto) {
     const informationUser = await this.validateUser(email, password);
+    if (!informationUser) throw new UnauthorizedException();
+    const tokens = await this.signJwt(informationUser.id, informationUser);
+    return {
+      ...tokens,
+      isPasswordInit: informationUser.isPasswordInit,
+      user: informationUser,
+    };
+  }
+
+  async clientLogin({ email, password }: LoginDto) {
+    const informationUser = await this.validateClient(email, password);
     if (!informationUser) throw new UnauthorizedException();
     const tokens = await this.signJwt(informationUser.id, informationUser);
     return {
@@ -265,7 +306,8 @@ export class AuthService {
   async registerClient(
     {
       email,
-      password
+      password,
+      phone
     }: RegisterClientDto,
     role: Role = Role.CLIENT,
     location
@@ -283,7 +325,7 @@ export class AuthService {
     const newUser = await this.prisma.clientUser.create({
       data: {
         email,
-        phone: '',
+        phone,
         role,
         location,
         password: hash,

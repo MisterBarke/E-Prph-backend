@@ -175,7 +175,6 @@ export class RegisterClientDto {
     default: '',
   })
   @IsString()
-  @IsEmail()
   @IsNotEmpty()
   address: string;
 }
@@ -190,6 +189,38 @@ export class updatePasswordDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'userId',
+    description: 'la propriété userId de type string',
+    default: 'pl90BGDkd76NY',
+  })
+  @IsString()
+  @IsOptional()
+  userId: string;
+}
+
+export class updateForgottenPasswordDto {
+  @ApiProperty({
+    type: 'string',
+    name: 'password',
+    description: 'la propriété password de type string',
+    default: 'pl90BGDkd76NY',
+  })
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  @ApiProperty({
+    type: 'string',
+    name: 'id',
+    description: 'la propriété id de type string',
+    default: 'pl90BGDkd76NY',
+  })
+  @IsString()
+  @IsNotEmpty()
+  id: string;
 }
 
 export class RefreshTokenDto {

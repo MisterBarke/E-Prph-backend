@@ -10,15 +10,15 @@ export class UploadService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    // this.supabaseClient = createClient(
-    //   this.configService.get<string>('supabase.url'),
-    //   this.configService.get<string>('supabase.key'),
-    //   {
-    //     auth: {
-    //       persistSession: false,
-    //     },
-    //   },
-    // );
+     this.supabaseClient = createClient(
+       this.configService.get<string>('supabase.url'),
+       this.configService.get<string>('supabase.key'),
+       {
+         auth: {
+           persistSession: false,
+         },
+       },
+     );
   }
   async getFiles(userId: string) {
     const connectedUser = await this.prisma.users.findFirst({
@@ -160,4 +160,61 @@ export class UploadService {
 
     return supabaseResp.error;
   }
+
+  async uploadClientFile(
+    file: Express.Multer.File,
+    userId?: string,
+  ) {
+    const folder = 'dossiers';
+    const name = `ph_${Math.ceil(Math.random() * 1000)}ph_${Date.now()}ph_${file.originalname}`;
+    const supabaseResp = await this.supabaseClient.storage
+      .from(folder)
+      .upload(name, file.buffer);
+      
+    if (!supabaseResp.error) {
+      const url = this.supabaseClient.storage
+        .from(folder)
+        .getPublicUrl(supabaseResp.data.path).data.publicUrl;
+  
+      // Recherche du ClientUser
+      const clientUser = await this.prisma.clientUser.findFirst({
+        where: { id: userId },
+      });
+  
+      if (clientUser) {
+        // Vérification de l'existence d'un dossier associé
+        let defaultClientFolder = await this.prisma.clientsFolders.findFirst({
+          where: { createdByClientId: clientUser.id },
+        });
+  
+        if (!defaultClientFolder) {
+          // Création d'un nouveau dossier client s'il n'existe pas
+          defaultClientFolder = await this.prisma.clientsFolders.create({
+            data: {
+              title: '',
+              description: '',
+              createdByClient: { connect: { id: clientUser.id } },
+            },
+          });
+        }
+  
+        // Création d'un document associé au dossier
+        const newClientDocument = await this.prisma.clientsDocuments.create({
+          data: {
+            title: file.originalname,
+            url,
+            clientsFolders: { connect: { id: defaultClientFolder.id } },
+            createdByClient: { connect: { id: clientUser.id } },
+          },
+        });
+  
+        return newClientDocument;
+      }
+  
+      return { error: "ClientUser not found." };
+    }
+  
+    return supabaseResp.error;
+  }
+  
 }
