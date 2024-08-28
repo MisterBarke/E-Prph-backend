@@ -293,11 +293,11 @@ export class AuthService {
 
   async pwrdEmailValidation(dto:pwrdEmailValidationDTO) {
     const user = await this.prisma.users.findUnique({
-      where: { email: dto.email },
+      where: { email: dto.email, isPasswordForgotten: true },
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Si vous avez oublié votre mot de passe veuillez vous rendre chez votre administrateur');
     }
       return user
   }
