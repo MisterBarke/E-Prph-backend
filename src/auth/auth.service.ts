@@ -161,7 +161,6 @@ export class AuthService {
     const tokens = await this.signJwt(informationUser.id, informationUser);
     return {
       ...tokens,
-      isPasswordInit: informationUser.isPasswordInit,
       user: informationUser,
     };
   }
