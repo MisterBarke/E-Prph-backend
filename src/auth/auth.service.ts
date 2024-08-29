@@ -175,7 +175,7 @@ export class AuthService {
     });
     if (retreiveUser) throw new HttpException('User already exist', 409);
 
-    const password = this.generatePassword();
+    const password = '123456';
     const saltOrRounds = 10;
     const hash = await bcrypt.hash(password, saltOrRounds);
     const getLocation = async (): Promise<string> => {
