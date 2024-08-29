@@ -60,7 +60,7 @@ export class AuthController {
   @Roles('ADMIN_MEMBER')
   @Post('register')
   registerMember(@Body() registerDto: RegisterDto, @Req() request) {
-    return this.authService.register(registerDto, Role.MEMBER, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
+    return this.authService.register(registerDto, Role.MEMBER, request.headers['x-forwarded-for'] || request.connection.remoteAddress, request.user.id);
   }
 
   @Public()
