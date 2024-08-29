@@ -72,7 +72,7 @@ export class AuthController {
   }
 
   @Post('password/update')
-  @Public()
+  @ApiBearerAuth()
   updatePassword(@Body() data: updatePasswordDto, @Req() request) {
     return this.authService.updatePassword(request.user.id, data);
   }
