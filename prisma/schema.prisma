@@ -83,6 +83,7 @@ model Folders {
   isSigningEnded        Boolean      @default(false)
   isVisibleByAccountant Boolean      @default(false)
   number                Int?
+  sharedTo               ShareFolderTo[] @relation("shareTo")
 }
 
 //Definis les signateurs pour un dossier
@@ -95,6 +96,16 @@ model Signateurs {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   hasSigned Boolean  @default(false)
+}
+
+model ShareFolderTo {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      Users    @relation("sharedTo", fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  folder    Folders  @relation("shareTo", fields: [folderId], references: [id])
+  folderId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Signatures {
@@ -153,7 +164,7 @@ model FolderViewer {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   folder      ClientsFolders @relation(fields: [folderId], references: [id])
   folderId    String   @db.ObjectId
-   user        Users    @relation("UserFolderViewers", fields: [userId], references: [id])
+  user        Users    @relation("UserFolderViewers", fields: [userId], references: [id])
   userId      String   @db.ObjectId
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

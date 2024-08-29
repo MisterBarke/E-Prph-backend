@@ -40,6 +40,11 @@ export class AssignSignateurDto {
   signateurs: string[];
 }
 
+export class ShareToDto {
+  @IsNotEmpty()
+  sharedTo: string[];
+}
+
 export class AddViewersDto {
   @IsNotEmpty()
   viewers: string[];

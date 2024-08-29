@@ -165,7 +165,7 @@ export class AuthService {
       isFromNiamey,
     }: RegisterDto,
     role: Role = Role.MEMBER,
-    location,
+    location: string,
     userId?: string,
   ) {
     const retreiveUser = await this.prisma.users.findUnique({
@@ -173,19 +173,30 @@ export class AuthService {
         email,
       },
     });
-
     if (retreiveUser) throw new HttpException('User already exist', 409);
 
     const password = this.generatePassword();
     const saltOrRounds = 10;
     const hash = await bcrypt.hash(password, saltOrRounds);
+    const getLocation = async (): Promise<string> => {
+      try {
+        const response = await axios.get(`http://ip-api.com/json/${location}?fields=city,regionName`);
+        const { city, regionName } = response.data;
+        return `${city}, ${regionName}`;
+      } catch (error) {
+        console.error('Error fetching location:', error);
+        return 'Unknown location';
+      }
+    }
+    const resolvedLocation = await getLocation();
+  
     const newUser = await this.prisma.users.create({
       data: {
         email,
         phone: '',
         role,
         password: hash,
-        location
+        location: resolvedLocation
       },
     });
 
