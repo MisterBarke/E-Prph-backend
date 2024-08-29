@@ -22,10 +22,11 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from './decorators/role.decorator';
 import { Role } from '@prisma/client';
 import { pwrdEmailValidationDTO } from 'src/users/dto/users.dto';
+import { ClientAuthService } from './clientAuth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService, private readonly clientAuth: ClientAuthService) {}
 
   @Public()
   @Post('login')
@@ -36,7 +37,7 @@ export class AuthController {
   @Public()
   @Post('login/client')
   signClient(@Body() loginDto: LoginDto) {
-    return this.authService.clientLogin(loginDto);
+    return this.clientAuth.clientLogin(loginDto);
   }
 
   @ApiBearerAuth()
@@ -67,7 +68,7 @@ export class AuthController {
   registerClient(@Body() registerClientDto: RegisterClientDto, @Req() request) {
     if (!registerClientDto.phone)
       throw new HttpException('veuiller ajouter votre numero de telephone', 400);
-    return this.authService.registerClient(registerClientDto, Role.CLIENT, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
+    return this.clientAuth.registerClient(registerClientDto, Role.CLIENT, request.headers['x-forwarded-for'] || request.connection.remoteAddress);
   }
 
   @Post('password/update')

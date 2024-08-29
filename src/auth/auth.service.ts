@@ -111,21 +111,6 @@ export class AuthService {
     return null;
   }
 
-  async validateClient(email: string, password: string) {
-    const user = await this.prisma.clientUser.findFirst({
-      where: {
-        email,
-      },
-    });
-    if (user) {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (isMatch) {
-        const { password, ...result } = user;
-        return result;
-      }
-    }
-    return null;
-  }
 
   async signJwt(userId: string, payload) {
     const data = {
@@ -133,7 +118,7 @@ export class AuthService {
       refresh_token: this.jwtService.sign({ userId }, { expiresIn: '1d' }),
     };
     const r = this.jwtService.decode(data.access_token);
-    await this.prisma.clientUser.update({
+    await this.prisma.users.update({
       where: {
         id: userId,
       },
@@ -155,15 +140,6 @@ export class AuthService {
     };
   }
 
-  async clientLogin({ email, password }: LoginDto) {
-    const informationUser = await this.validateClient(email, password);
-    if (!informationUser) throw new UnauthorizedException();
-    const tokens = await this.signJwt(informationUser.id, informationUser);
-    return {
-      ...tokens,
-      user: informationUser,
-    };
-  }
 
   generatePassword() {
     const alphabets = 'AZERTYUIOPMLKJHGFDSQWXCVBN'.split('');
@@ -302,50 +278,4 @@ export class AuthService {
       return user
   }
 
-  async registerClient(
-    {
-      email,
-      password,
-      phone
-    }: RegisterClientDto,
-    role: Role = Role.CLIENT,
-    location
-  ) {
-    const retreiveUser = await this.prisma.users.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (retreiveUser) throw new HttpException('User already exist', 409);
-
-    const saltOrRounds = 10;
-    const hash = await bcrypt.hash(password, saltOrRounds);
-    const newUser = await this.prisma.clientUser.create({
-      data: {
-        email,
-        phone,
-        role,
-        location,
-        password: hash,
-      },
-    });
-
-    await this.mailService.sendMail({
-      companyContry: 'Niger',
-      companyName: 'BAGRI',
-      email,
-      subject: 'Informations de connexions',
-      template: 'credential',
-      title:
-        'Bienvenue au Parapheur de BAGRI, Veuiller Vous connecter avec le mot de passe',
-      context: {
-        username: email.split('@')[0].split('.').join(' '),
-        companyName: 'BAGRI',
-        password,
-      },
-    });
-
-    return newUser;
-  }
 }

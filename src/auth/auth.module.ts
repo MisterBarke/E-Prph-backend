@@ -10,6 +10,7 @@ import { MailModule } from '../mail/mail.module';
 import { SupabaseModule } from '../supabase.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
+import { ClientAuthService } from './clientAuth.service';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, ClientAuthService],
   // exports: [SupabaseStrategy],
 })
 export class AuthModule {}
