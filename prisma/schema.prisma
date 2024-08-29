@@ -33,6 +33,7 @@ model Users {
   isPasswordForgotten        Boolean          @default(false)
   location                   String?
   folderViewers              FolderViewer[]   @relation("UserFolderViewers")
+  folderSharedTo             ShareFolderTo[]     @relation("sharedTo")
 }
 
 model Documents {
