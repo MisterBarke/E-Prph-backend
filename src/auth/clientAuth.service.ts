@@ -40,6 +40,26 @@ import {
         return 'Unknown location';
       }
     }
+
+    async updatePassword({password, userId }: updatePasswordDto) {
+        const user = await this.prisma.clientUser.findUnique({
+          where: {
+            id: userId,
+          },
+        });
+        if (!user) throw new UnauthorizedException();
+        const saltOrRounds = 10;
+        const hash = await bcrypt.hash(password, saltOrRounds);
+        await this.prisma.clientUser.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            isPasswordInit: true,
+            password: hash,
+          },
+        });
+      }
   
     async retreiveNewSession({ refresh_token }: RefreshTokenDto) {
       const data = await this.jwtService.verify(refresh_token);

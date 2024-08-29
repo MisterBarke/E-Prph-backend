@@ -59,7 +59,7 @@ export class AuthService {
     const res = await this.signJwt(user.id, rest);
     return res;
   }
-  async updatePassword(id: string | undefined, updatePasswordDto: updatePasswordDto) {
+  /* async updatePassword(id: string | undefined, updatePasswordDto: updatePasswordDto) {
     const { userId, password } = updatePasswordDto;
 
     if (!id && !userId) {
@@ -90,7 +90,27 @@ export class AuthService {
       },
     });
   }
+ */
 
+  async updatePassword(id: string, { password }: updatePasswordDto) {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!user) throw new UnauthorizedException();
+    const saltOrRounds = 10;
+    const hash = await bcrypt.hash(password, saltOrRounds);
+    await this.prisma.users.update({
+      where: {
+        id,
+      },
+      data: {
+        isPasswordInit: true,
+        password: hash,
+      },
+    });
+  }
 
   async validateUser(email: string, password: string) {
     const user = await this.prisma.users.findFirst({
