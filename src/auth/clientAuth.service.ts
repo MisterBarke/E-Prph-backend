@@ -55,7 +55,7 @@ import {
             id: userId,
           },
           data: {
-            isPasswordInit: true,
+            isPasswordForgotten:true,
             password: hash,
           },
         });
