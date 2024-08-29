@@ -52,7 +52,7 @@ export class RegisterDto {
     default: 'companysoftart@gmail.com',
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   location: string;
 
   @ApiProperty({
