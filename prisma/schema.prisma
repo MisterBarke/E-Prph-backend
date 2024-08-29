@@ -56,6 +56,7 @@ model Departement {
   isCreditAgricole Boolean   @default(false)
   isServiceReseau  Boolean   @default(false)
   isAccountant     Boolean   @default(false)
+  isServiceCourier Boolean   @default(false)
   isFromNiamey     Boolean   @default(false)
   folders          Folders[]
   isDefault        Boolean   @default(false)

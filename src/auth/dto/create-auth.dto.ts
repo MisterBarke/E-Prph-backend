@@ -127,6 +127,16 @@ export class RegisterDto {
 
   @ApiProperty({
     type: 'boolean',
+    name: 'isServiceCourier',
+    description: 'la propriété isServiceCourier de type boolean',
+    default: '',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isServiceCourier: boolean;
+
+  @ApiProperty({
+    type: 'boolean',
     name: 'isFromNiamey',
     description: 'la propriété isFromNiamey de type boolean',
     default: '',

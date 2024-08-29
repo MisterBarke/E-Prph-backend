@@ -1,4 +1,5 @@
 import {
+  HttpException,
     Injectable,
     NotFoundException,
   } from '@nestjs/common';
@@ -61,20 +62,38 @@ export class ClientsFoldersService {
     }: PaginationParams,
     userId: string,
   ) {
-    const connectedUser = await this.prisma.clientUser.findUnique({
+    const connectedClient = await this.prisma.clientUser.findUnique({
       where: {
         id: userId,
       },
     });
-    console.log(connectedUser);
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+      include:{
+        departement:true
+      }
+    });
+    if (connectedUser.departement.isServiceCourier) {
+      return await this.prisma.clientsFolders.findMany({
+        skip: decalage,
+        take: limit,
+        include: {
+          createdByClient: true,
+          documents: true,
+          viewers: true
+        },
+      });
+    }
     return await this.prisma.clientsFolders.findMany({
       skip: decalage,
       take: limit,
       where: {
-        createdByClientId: connectedUser.id
-        /* OR:[
+        //createdByClientId: connectedUser.id,
+        OR:[
           {
-            createdByClientId: connectedUser.id
+            createdByClientId: connectedClient.id
           },
           {
             viewers: {
@@ -83,7 +102,7 @@ export class ClientsFoldersService {
               },
             },
           }
-        ] */
+        ]
       },
       include: {
         createdByClient: true,
@@ -147,5 +166,90 @@ export class ClientsFoldersService {
         description: dto.description ?? data.description,
       },
     });
+  }
+
+  async addViwer(id: string, dto: AddViewersDto) {
+    if (!dto?.viewers || !dto?.viewers?.length) return;
+
+    const users = await this.prisma.users.findMany({
+      where: {
+        id: {
+          in: dto.viewers,
+        },
+      },
+    });
+
+    if (users.length !== dto.viewers.length) {
+      const existingIds = users.map((user) => user.id);
+      const nonExistingIds = dto.viewers.filter(
+        (id) => !existingIds.includes(id),
+      );
+      throw new HttpException(
+        `Id ${nonExistingIds.join(' ||| ')} incorrects`,
+        400,
+      );
+    }
+ 
+    const addViwers = await Promise.all(
+      dto.viewers.map(async (userId) => {
+        let viewer = await this.prisma.folderViewer.findFirst({
+          where: { userId, folderId: id },
+        });
+
+        if (!viewer) {
+          viewer = await this.prisma.shareFolderTo.create({
+            data: {
+              userId,
+              folderId: id,
+            },
+          });
+        }
+
+        return viewer;
+      }),
+    );
+
+    try {
+      await this.prisma.clientsFolders.update({
+        where: { id },
+        data: {
+          viewers: {
+            connect: addViwers.map((user) => ({ id: user.id })),
+          },
+        },
+      });
+
+      const folder = await this.prisma.clientsFolders.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      await this.mailService.sendNoticationForSignature({
+        email: users[0].email,
+        subject: 'Courier',
+        title: 'Nouveau Courier',
+        companyName: 'BAGRI Niger',
+        companyContry: 'Niger',
+        template: 'notification',
+        context: {
+          username: users[0].name,
+          folderName: folder.title,
+          folderNumber: '',
+        },
+      });
+
+      return 'Dossier partagé';
+    } catch (error) {
+      console.error(error);
+      if (error.code === 'P2018') {
+        throw new HttpException(
+          'Failed to update folder: connected records not found',
+          500,
+        );
+      } else {
+        throw new HttpException('Failed to update folder', 500);
+      }
+    }
   }
 }

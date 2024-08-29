@@ -41,12 +41,12 @@ export class AssignSignateurDto {
 }
 
 export class ShareToDto {
-  @IsNotEmpty()
+  @IsOptional()
   sharedTo: string[];
 }
 
 export class AddViewersDto {
-  @IsNotEmpty()
+  @IsOptional()
   viewers: string[];
 }
 

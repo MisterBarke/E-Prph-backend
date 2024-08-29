@@ -13,6 +13,7 @@ import {
   AssignSignateurDto,
   FolderSignatureDto,
   FolderVisibilityByAccountantDto,
+  ShareToDto,
 } from './dto/folders.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { log } from 'console';
@@ -654,5 +655,90 @@ export class FoldersService {
     });
 
     return deletedFolder;
+  }
+
+  async shareFolder(id: string, dto: ShareToDto) {
+    if (!dto?.sharedTo || !dto?.sharedTo?.length) return;
+
+    const users = await this.prisma.users.findMany({
+      where: {
+        id: {
+          in: dto.sharedTo,
+        },
+      },
+    });
+
+    if (users.length !== dto.sharedTo.length) {
+      const existingIds = users.map((user) => user.id);
+      const nonExistingIds = dto.sharedTo.filter(
+        (id) => !existingIds.includes(id),
+      );
+      throw new HttpException(
+        `Id ${nonExistingIds.join(' ||| ')} incorrects`,
+        400,
+      );
+    }
+ 
+    const sharedToUsers = await Promise.all(
+      dto.sharedTo.map(async (userId) => {
+        let sharedToUser = await this.prisma.shareFolderTo.findFirst({
+          where: { userId, folderId: id },
+        });
+
+        if (!sharedToUser) {
+          sharedToUser = await this.prisma.shareFolderTo.create({
+            data: {
+              userId,
+              folderId: id,
+            },
+          });
+        }
+
+        return sharedToUser;
+      }),
+    );
+
+    try {
+      await this.prisma.folders.update({
+        where: { id },
+        data: {
+          sharedTo: {
+            connect: sharedToUsers.map((user) => ({ id: user.id })),
+          },
+        },
+      });
+
+      const folder = await this.prisma.folders.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      await this.mailService.sendNoticationForSignature({
+        email: users[0].email,
+        subject: 'Courier',
+        title: 'Nouveau Courier',
+        companyName: 'BAGRI Niger',
+        companyContry: 'Niger',
+        template: 'notification',
+        context: {
+          username: users[0].name,
+          folderName: folder.title,
+          folderNumber: `${folder.number}`,
+        },
+      });
+
+      return 'Dossier partagé';
+    } catch (error) {
+      console.error(error);
+      if (error.code === 'P2018') {
+        throw new HttpException(
+          'Failed to update folder: connected records not found',
+          500,
+        );
+      } else {
+        throw new HttpException('Failed to update folder', 500);
+      }
+    }
   }
 }

@@ -30,6 +30,7 @@ import {
   CreateClientsFoldersDto,
   UpdateClientsFoldersDto,
   AddViewersDto,
+  ShareToDto,
 } from './dto/folders.dto';
 import { request } from 'http';
 import { ClientsFoldersService } from './clientsFolders.service';
@@ -327,6 +328,44 @@ export class FoldersController {
     return this.foldersService.assignSignateursToFolder(id, dto, request.user.id);
   }
 
+  @ApiCreatedResponse({ description: 'Partage d\'un folder' })
+  @ApiResponse({
+    status: 200,
+    description: 'Folder Partagé',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: UpdateFoldersDto })
+  @ApiOperation({
+    operationId: 'shareFolder',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Put(':id/shareFolder')
+  shareFolderToUser(
+    @Param('id') id: string,
+    @Body() dto: ShareToDto,
+  ) {
+    return this.foldersService.shareFolder(id, dto);
+  }
+
+  
 
   @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({
