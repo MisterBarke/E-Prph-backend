@@ -311,4 +311,24 @@ export class AuthService {
       return user
   }
 
+  async recoverPassword({ password, userId }: updatePasswordDto) {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) throw new UnauthorizedException();
+    const saltOrRounds = 10;
+    const hash = await bcrypt.hash(password, saltOrRounds);
+    await this.prisma.users.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        isPasswordInit: true,
+        password: hash,
+        isPasswordForgotten: false
+      },
+    });
+  }
 }

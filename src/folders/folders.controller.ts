@@ -366,7 +366,6 @@ export class FoldersController {
   }
 
   
-
   @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({
     status: 200,

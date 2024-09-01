@@ -83,6 +83,12 @@ export class AuthController {
     return this.clientAuth.updatePassword(data);
   }
 
+  @Post('password/recover')
+  @Public()
+  recoverPassword(@Body() data: updatePasswordDto) {
+    return this.authService.recoverPassword(data);
+  }
+
   @Post('refresh')
   @ApiBearerAuth()
   @Public()
