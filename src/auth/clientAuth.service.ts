@@ -30,16 +30,6 @@ import {
     ) {
    
     }
-    private async getLocation(ip: string): Promise<string> {
-      try {
-        const response = await axios.get(`http://ip-api.com/json/${ip}?fields=city,regionName`);
-        const { city, regionName } = response.data;
-        return `${city}, ${regionName}`;
-      } catch (error) {
-        console.error('Error fetching location:', error);
-        return 'Unknown location';
-      }
-    }
 
     async updatePassword({password, userId }: updatePasswordDto) {
         const user = await this.prisma.clientUser.findUnique({
@@ -139,7 +129,7 @@ import {
         phone
       }: RegisterClientDto,
       role: Role = Role.CLIENT,
-      location
+      location: string
     ) {
       const retreiveUser = await this.prisma.users.findUnique({
         where: {
@@ -151,12 +141,24 @@ import {
   
       const saltOrRounds = 10;
       const hash = await bcrypt.hash(password, saltOrRounds);
+      const getLocation = async (): Promise<string> => {
+        try {
+          const response = await axios.get(`http://ip-api.com/json/${location}?fields=city,regionName`);
+          const { city, regionName } = response.data;
+          return `${city}, ${regionName}`;
+        } catch (error) {
+          console.error('Error fetching location:', error);
+          return 'Unknown location';
+        }
+      }
+      const resolvedLocation = await getLocation();
+
       const newUser = await this.prisma.clientUser.create({
         data: {
           email,
           phone,
           role,
-          location,
+          location: resolvedLocation,
           password: hash,
         },
       });
