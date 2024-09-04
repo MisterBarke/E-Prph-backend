@@ -135,7 +135,8 @@ model ClientUser {
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
   isPasswordForgotten Boolean          @default(false)
-  location                   String?
+  location            String?
+  address             String?
 }
 
 model ClientsFolders {
