@@ -212,7 +212,7 @@ export class FoldersController {
   @ApiOperation({
     operationId: 'GetOneFolders',
   })
-  @Get(':id')
+  @Get(':id/get_one')
   findOne(@Param('id') id: string) {
     return this.foldersService.findOne(id);
   }
@@ -252,8 +252,6 @@ export class FoldersController {
     return this.foldersService.update(id, dto);
   }
 
-
-  // edit folder Visibility
   @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({
     status: 200,
@@ -262,43 +260,7 @@ export class FoldersController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiBody({ type: UpdateFoldersDto })
-  @ApiOperation({
-    operationId: 'UpdateFolders',
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          encoding: {
-            about: {
-              contentType: 'application/json',
-            },
-          },
-          schema: {
-            type: 'object',
-            properties: {
-              about: { type: 'array', items: { type: 'number' } },
-            },
-          },
-        },
-      },
-    },
-  })
-  @Put(':id/visibility')
-  updateVisibility(@Param('id') id: string,
-  @Body() dto: FolderVisibilityByAccountantDto,
-  @Req() request){
-    return this.foldersService.updateVisibilityByAccountant(id, dto, request.user.id);
-  }
-
-  @ApiCreatedResponse({ description: 'Modification de Folders' })
-  @ApiResponse({
-    status: 200,
-    description: 'Folders est modifié',
-  })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
-  @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiBody({ type: UpdateFoldersDto })
+  @ApiBody({ type: AssignSignateurDto })
   @ApiOperation({
     operationId: 'UpdateFolders',
     requestBody: {
@@ -336,7 +298,7 @@ export class FoldersController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiBody({ type: UpdateFoldersDto })
+  @ApiBody({ type: ShareToDto })
   @ApiOperation({
     operationId: 'shareFolder',
     requestBody: {
@@ -480,6 +442,8 @@ export class FoldersController {
     }: PaginationParams,
     @Req() request,
   ) {
+    //console.log(request.user);
+    
     return this.clientsFoldersService.findAll(
       { decalage, limit, dateDebut, dateFin },
       request.user.id,

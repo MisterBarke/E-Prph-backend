@@ -126,7 +126,8 @@ import {
       {
         email,
         password,
-        phone
+        phone,
+        address
       }: RegisterClientDto,
       role: Role = Role.CLIENT,
       location: string
@@ -158,6 +159,7 @@ import {
           email,
           phone,
           role,
+          address,
           location: resolvedLocation,
           password: hash,
         },

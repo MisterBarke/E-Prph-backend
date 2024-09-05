@@ -556,7 +556,6 @@ export class FoldersService {
   }
 
   async findOne(id: string) {
-    console.log(id);
     try {
       return await this.prisma.folders.findUnique({
         where: { id },

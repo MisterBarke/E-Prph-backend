@@ -67,6 +67,7 @@ export class ClientsFoldersService {
         id: userId,
       },
     });
+    
     const connectedUser = await this.prisma.users.findUnique({
       where: {
         id: userId,
@@ -75,7 +76,8 @@ export class ClientsFoldersService {
         departement:true
       }
     });
-    if (connectedUser.departement.isServiceCourier) {
+    if (connectedUser && connectedUser.departement.isServiceCourier) {
+      
       return await this.prisma.clientsFolders.findMany({
         skip: decalage,
         take: limit,
@@ -86,29 +88,40 @@ export class ClientsFoldersService {
         },
       });
     }
-    return await this.prisma.clientsFolders.findMany({
-      skip: decalage,
-      take: limit,
-      where: {
-        //createdByClientId: connectedUser.id,
-        OR:[
-          {
-            createdByClientId: connectedClient.id
-          },
-          {
-            viewers: {
-              some: {
-                id: connectedUser.id,
-              },
+
+    if (connectedUser && !connectedUser.departement.isServiceCourier) {
+      return await this.prisma.clientsFolders.findMany({
+        skip: decalage,
+        take: limit,
+        where:{
+          viewers: {
+            some: {
+              id: connectedUser.id,
             },
-          }
-        ]
-      },
-      include: {
-        createdByClient: true,
-        documents: true
-      },
-    });
+          },
+        },
+        include: {
+          createdByClient: true,
+          documents: true,
+          viewers: true
+        },
+      });
+    }
+
+    if (connectedClient) {
+      return await this.prisma.clientsFolders.findMany({
+        skip: decalage,
+        take: limit,
+        where: {
+          createdByClientId: connectedClient.id
+        },
+        include: {
+          createdByClient: true,
+          documents: true
+        },
+      });
+    }
+    
   }
 
   async addViewersToFolder(folderId: string, addViewersDto: AddViewersDto) {
