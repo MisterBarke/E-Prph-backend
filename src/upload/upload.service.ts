@@ -10,15 +10,15 @@ export class UploadService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-     this.supabaseClient = createClient(
-       this.configService.get<string>('supabase.url'),
-       this.configService.get<string>('supabase.key'),
-       {
-         auth: {
-           persistSession: false,
-         },
-       },
-     );
+    this.supabaseClient = createClient(
+      this.configService.get<string>('supabase.url'),
+      this.configService.get<string>('supabase.key'),
+      {
+        auth: {
+          persistSession: false,
+        },
+      },
+    );
   }
   async getFiles(userId: string) {
     const connectedUser = await this.prisma.users.findFirst({
@@ -79,8 +79,7 @@ export class UploadService {
           },
         });
         if (!connectedUser.departement?.id) {
-          let defaultDepartement = await this.prisma.departement.findFirst({
-          });
+          let defaultDepartement = await this.prisma.departement.findFirst({});
           if (!defaultDepartement) {
             defaultDepartement = await this.prisma.departement.create({
               data: {
@@ -102,43 +101,46 @@ export class UploadService {
           });
           connectedUser['departement'] = [defaultDepartement];
         }
-        let defaultFolder = await this.prisma.folders.findFirst({
+        const defaultFolder = await this.prisma.folders.findFirst({
           where: {
             departementId: connectedUser?.departement?.id,
           },
         });
-        if (!defaultFolder) {
-          defaultFolder = await this.prisma.folders.create({
-            data: {
-              description: '',
-              title: '',
-              adress: '',
-              departement: {
-                connect: {
-                  id: connectedUser?.departement?.id,
-                },
-              },
-              email: '',
-              telephone: '',
-              nom: '',
-              createdBy: {
-                connect: {
-                  id: connectedUser?.id,
-                },
-              },
-            },
-          });
-        }
+        // if (!defaultFolder) {
+        //   defaultFolder = await this.prisma.folders.create({
+        //     data: {
+        //       description: '',
+        //       title: '',
+        //       adress: '',
+        //       departement: {
+        //         connect: {
+        //           id: connectedUser?.departement?.id,
+        //         },
+        //       },
+        //       email: '',
+        //       telephone: '',
+        //       nom: '',
+        //       createdBy: {
+        //         connect: {
+        //           id: connectedUser?.id,
+        //         },
+        //       },
+        //     },
+        //   });
+        // }
 
+        const rest: any = {};
+        if (defaultFolder?.id)
+          rest.folder = {
+            connect: {
+              id: defaultFolder?.id,
+            },
+          };
         const newDocument = await this.prisma.documents.create({
           data: {
             title: file.originalname,
             url,
-            folder: {
-              connect: {
-                id: defaultFolder.id,
-              },
-            },
+            ...rest,
             createdBy: {
               connect: {
                 id: connectedUser.id,
@@ -161,32 +163,31 @@ export class UploadService {
     return supabaseResp.error;
   }
 
-  async uploadClientFile(
-    file: Express.Multer.File,
-    userId?: string,
-  ) {
+  async uploadClientFile(file: Express.Multer.File, userId?: string) {
     const folder = 'dossiers';
-    const name = `ph_${Math.ceil(Math.random() * 1000)}ph_${Date.now()}ph_${file.originalname}`;
+    const name = `ph_${Math.ceil(Math.random() * 1000)}ph_${Date.now()}ph_${
+      file.originalname
+    }`;
     const supabaseResp = await this.supabaseClient.storage
       .from(folder)
       .upload(name, file.buffer);
-      
+
     if (!supabaseResp.error) {
       const url = this.supabaseClient.storage
         .from(folder)
         .getPublicUrl(supabaseResp.data.path).data.publicUrl;
-  
+
       // Recherche du ClientUser
       const clientUser = await this.prisma.clientUser.findFirst({
         where: { id: userId },
       });
-  
+
       if (clientUser) {
         // Vérification de l'existence d'un dossier associé
         let defaultClientFolder = await this.prisma.clientsFolders.findFirst({
           where: { createdByClientId: clientUser.id },
         });
-  
+
         if (!defaultClientFolder) {
           // Création d'un nouveau dossier client s'il n'existe pas
           defaultClientFolder = await this.prisma.clientsFolders.create({
@@ -197,7 +198,7 @@ export class UploadService {
             },
           });
         }
-  
+
         // Création d'un document associé au dossier
         const newClientDocument = await this.prisma.clientsDocuments.create({
           data: {
@@ -207,14 +208,13 @@ export class UploadService {
             createdByClient: { connect: { id: clientUser.id } },
           },
         });
-  
+
         return newClientDocument;
       }
-  
-      return { error: "ClientUser not found." };
+
+      return { error: 'ClientUser not found.' };
     }
-  
+
     return supabaseResp.error;
   }
-  
 }
