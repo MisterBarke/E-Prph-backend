@@ -70,9 +70,13 @@ export class FoldersService {
       },
     });
 
-    await this.assignSignateursToFolder(newData.id,{
-      signateurs: dto?.signateurs,
-    }, userId);
+    await this.assignSignateursToFolder(
+      newData.id,
+      {
+        signateurs: dto?.signateurs,
+      },
+      userId,
+    );
 
     //Update files names
     for (let i = 0; i < dto.files.length; i++) {
@@ -95,12 +99,7 @@ export class FoldersService {
   }
 
   async findAll(
-    {
-      limit,
-      decalage,
-      dateDebut,
-      dateFin,
-    }: PaginationParams,
+    { limit, decalage, dateDebut, dateFin }: PaginationParams,
     userId: string,
   ) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -124,7 +123,11 @@ export class FoldersService {
       },
       include: {
         createdBy: true,
-        signateurs: true,
+        signateurs: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
         signatures: true,
         departement: true,
         documents: true,
@@ -133,12 +136,7 @@ export class FoldersService {
   }
 
   async getFoldersByAdmins(
-    {
-      limit,
-      decalage,
-      dateDebut,
-      dateFin,
-    }: PaginationParams,
+    { limit, decalage, dateDebut, dateFin }: PaginationParams,
     userId: string,
   ) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -149,9 +147,7 @@ export class FoldersService {
         departement: true,
       },
     });
-    if (
-      connectedUser.role === 'ADMIN_MEMBER' 
-    ) {
+    if (connectedUser.role === 'ADMIN_MEMBER') {
       return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
@@ -159,7 +155,6 @@ export class FoldersService {
           createdBy: {
             id: connectedUser.id,
           },
-
         },
         include: {
           documents: true,
@@ -169,12 +164,15 @@ export class FoldersService {
             include: {
               user: true,
             },
+            orderBy: {
+              createdAt: 'asc',
+            },
           },
           signatures: true,
         },
       });
     }
-    
+
     if (connectedUser.role == 'ADMIN') {
       return await this.prisma.folders.findMany({
         skip: +decalage,
@@ -183,7 +181,11 @@ export class FoldersService {
           documents: true,
           departement: true,
           createdBy: true,
-          signateurs: true,
+          signateurs: {
+            orderBy: {
+              createdAt: 'asc',
+            },
+          },
           signatures: true,
         },
       });
@@ -209,7 +211,6 @@ export class FoldersService {
             userId: connectedUser.id,
           },
         },
-        
       },
       include: {
         documents: true,
@@ -217,9 +218,12 @@ export class FoldersService {
           include: {
             user: true,
           },
+          orderBy: {
+            createdAt: 'asc',
+          },
         },
         createdBy: true,
-        signatures: true
+        signatures: true,
       },
     });
   }
@@ -255,6 +259,9 @@ export class FoldersService {
             include: {
               user: true,
             },
+            orderBy: {
+              createdAt: 'asc',
+            },
           },
           signatures: {
             include: {
@@ -279,6 +286,9 @@ export class FoldersService {
           signateurs: {
             include: {
               user: true,
+            },
+            orderBy: {
+              createdAt: 'asc',
             },
           },
           signatures: {
@@ -307,6 +317,9 @@ export class FoldersService {
             include: {
               user: true,
             },
+            orderBy: {
+              createdAt: 'asc',
+            },
           },
           signatures: {
             include: {
@@ -318,7 +331,11 @@ export class FoldersService {
     }
   }
 
-  async assignSignateursToFolder(id: string, dto: AssignSignateurDto, userId: string,) {
+  async assignSignateursToFolder(
+    id: string,
+    dto: AssignSignateurDto,
+    userId: string,
+  ) {
     if (!dto?.signateurs || !dto?.signateurs?.length) return;
     const connectedUser = await this.prisma.users.findUnique({
       where: {
@@ -346,16 +363,19 @@ export class FoldersService {
         400,
       );
     }
- 
+
     const serviceReseauUser = dto.signateurs.map(async (userId) => {
-    let user = await this.prisma.users.findUnique({
-      where:{id: userId, departement: {isServiceReseau:true}}
-    })
-    return user
-    })
-    if (connectedUser.departement.isFromNiamey === false && !serviceReseauUser) {
+      let user = await this.prisma.users.findUnique({
+        where: { id: userId, departement: { isServiceReseau: true } },
+      });
+      return user;
+    });
+    if (
+      connectedUser.departement.isFromNiamey === false &&
+      !serviceReseauUser
+    ) {
       throw new HttpException(
-       "Veuillez sélectionner un signataire du service réseau dans la liste des signataires du dossier",
+        'Veuillez sélectionner un signataire du service réseau dans la liste des signataires du dossier',
         400,
       );
     }
@@ -379,14 +399,19 @@ export class FoldersService {
     );
 
     try {
-      await this.prisma.folders.update({
-        where: { id },
-        data: {
-          signateurs: {
-            connect: signateurs.map((signateur) => ({ id: signateur.id })),
+      for (let i = 0; i < signateurs.length; i++) {
+        const idsign = signateurs[i].id;
+        await this.prisma.folders.update({
+          where: { id },
+          data: {
+            signateurs: {
+              connect: {
+                id: idsign,
+              },
+            },
           },
-        },
-      });
+        });
+      }
 
       const folder = await this.prisma.folders.findUnique({
         where: {
@@ -422,7 +447,7 @@ export class FoldersService {
     }
   }
 
- /*async folderValidationByServiceReseau(
+  /*async folderValidationByServiceReseau(
     id: string,
     data: FolderValidationDto,
     userId: string,
@@ -466,6 +491,9 @@ export class FoldersService {
       include: {
         signateurs: {
           include: { user: true },
+          orderBy: {
+            createdAt: 'asc',
+          },
         },
         departement: true,
         signatures: {
@@ -515,7 +543,11 @@ export class FoldersService {
     const updatedFolder = await this.prisma.folders.findUnique({
       where: { id: folderId },
       include: {
-        signateurs: true,
+        signateurs: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
       },
     });
 
@@ -565,6 +597,9 @@ export class FoldersService {
             include: {
               user: true,
             },
+            orderBy: {
+              createdAt: 'asc',
+            },
           },
           signatures: {
             include: {
@@ -577,9 +612,7 @@ export class FoldersService {
       });
     } catch (error) {
       console.log(error);
-      
     }
-    
   }
 
   async update(id, dto: UpdateFoldersDto) {
@@ -677,7 +710,7 @@ export class FoldersService {
         400,
       );
     }
- 
+
     const sharedToUsers = await Promise.all(
       dto.sharedTo.map(async (userId) => {
         let sharedToUser = await this.prisma.shareFolderTo.findFirst({
