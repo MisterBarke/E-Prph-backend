@@ -179,11 +179,11 @@ export class FoldersService {
           documents: true,
           departement: true,
           createdBy: true,
-          signateurs: {
+        /*   signateurs: {
             orderBy: {
-              order: 'asc',
+              createdAt: 'asc',
             },
-          },
+          }, */
           signatures: true,
         },
       });
