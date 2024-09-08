@@ -98,43 +98,6 @@ export class FoldersService {
     return newData;
   }
 
-  /* async findAll(
-    { limit, decalage, dateDebut, dateFin }: PaginationParams,
-    userId: string,
-  ) {
-    const connectedUser = await this.prisma.users.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        departement: true,
-      },
-    });
-    return await this.prisma.folders.findMany({
-      skip: decalage,
-      take: limit,
-      where: {
-        departementId: connectedUser.departement.id,
-        signateurs: {
-          some: {
-            userId: connectedUser.id,
-          },
-        },
-      },
-      include: {
-        createdBy: true,
-        signateurs: {
-          orderBy: {
-            createdAt: 'asc',
-          },
-        },
-        signatures: true,
-        departement: true,
-        documents: true,
-      },
-    });
-  } */
-
   async getAllFolders(
     { limit, decalage, dateDebut, dateFin, isSigningEnded=false, }: PaginationParams,
     userId: string,
@@ -211,9 +174,9 @@ export class FoldersService {
             include: {
               user: true,
             },
-            orderBy: {
+           /*  orderBy: {
               order: 'asc',
-            },
+            }, */
           },
           createdBy: true,
           signatures: true,
@@ -222,144 +185,6 @@ export class FoldersService {
     }
   }
 
- /*  async getFoldersBySignatory(
-    { limit, decalage, dateDebut, dateFin }: PaginationParams,
-    userId: string,
-  ) {
-    const connectedUser = await this.prisma.users.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    return await this.prisma.folders.findMany({
-      skip: +decalage,
-      take: +limit,
-      where: {
-        signateurs: {
-          some: {
-            userId: connectedUser.id,
-          },
-        },
-      },
-      include: {
-        documents: true,
-        signateurs: {
-          include: {
-            user: true,
-          },
-          orderBy: {
-            order: 'asc',
-          },
-        },
-        createdBy: true,
-        signatures: true,
-      },
-    });
-  } */
-
-  /* async getSignedFolders(
-    {
-      limit,
-      decalage,
-      dateDebut,
-      dateFin,
-      isSigningEnded = false,
-    }: PaginationParams,
-    userId: string,
-  ) {
-    const connectedUser = await this.prisma.users.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        departement: true,
-      },
-    });
-    if (connectedUser.role === 'ADMIN') {
-      return await this.prisma.folders.findMany({
-        skip: +decalage,
-        take: +limit,
-        where: {
-          isSigningEnded: isSigningEnded ? true : false,
-        },
-        include: {
-          documents: true,
-          signateurs: {
-            include: {
-              user: true,
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-          signatures: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-    }
-    if (connectedUser.role === 'ADMIN_MEMBER') {
-      return await this.prisma.folders.findMany({
-        skip: +decalage,
-        take: +limit,
-        where: {
-          createdBy: {
-            id: connectedUser.id,
-          },
-          isSigningEnded: isSigningEnded ? true : false,
-        },
-        include: {
-          documents: true,
-          signateurs: {
-            include: {
-              user: true,
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-          signatures: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-    }
-    if (connectedUser.role === 'MEMBER') {
-      return await this.prisma.folders.findMany({
-        skip: +decalage,
-        take: +limit,
-        where: {
-          signateurs: {
-            some: {
-              userId: connectedUser.id,
-            },
-          },
-          isSigningEnded: isSigningEnded ? true : false,
-        },
-        include: {
-          documents: true,
-          signateurs: {
-            include: {
-              user: true,
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-          signatures: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-    }
-  } */
 
   async assignSignateursToFolder(
     id: string,
@@ -628,9 +453,9 @@ export class FoldersService {
             include: {
               user: true,
             },
-            orderBy: {
+           /*  orderBy: {
               order: 'asc',
-            },
+            }, */
           },
           signatures: {
             include: {
