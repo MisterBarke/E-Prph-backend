@@ -125,7 +125,7 @@ export class FoldersService {
         createdBy: true,
         signateurs: {
           orderBy: {
-            createdAt: 'asc',
+            order: 'asc',
           },
         },
         signatures: true,
@@ -164,9 +164,7 @@ export class FoldersService {
             include: {
               user: true,
             },
-            orderBy: {
-              createdAt: 'asc',
-            },
+            orderBy: { order: 'asc' },
           },
           signatures: true,
         },
@@ -183,7 +181,7 @@ export class FoldersService {
           createdBy: true,
           signateurs: {
             orderBy: {
-              createdAt: 'asc',
+              order: 'asc',
             },
           },
           signatures: true,
@@ -219,7 +217,7 @@ export class FoldersService {
             user: true,
           },
           orderBy: {
-            createdAt: 'asc',
+            order: 'asc',
           },
         },
         createdBy: true,
@@ -260,7 +258,7 @@ export class FoldersService {
               user: true,
             },
             orderBy: {
-              createdAt: 'asc',
+              order: 'asc',
             },
           },
           signatures: {
@@ -288,7 +286,7 @@ export class FoldersService {
               user: true,
             },
             orderBy: {
-              createdAt: 'asc',
+              order: 'asc',
             },
           },
           signatures: {
@@ -318,7 +316,7 @@ export class FoldersService {
               user: true,
             },
             orderBy: {
-              createdAt: 'asc',
+              order: 'asc',
             },
           },
           signatures: {
@@ -379,26 +377,26 @@ export class FoldersService {
         400,
       );
     } */
-    const signateurs = await Promise.all(
-      dto.signateurs.map(async (userId) => {
-        let signateur = await this.prisma.signateurs.findFirst({
-          where: { userId, folderId: id },
-        });
-
-        if (!signateur) {
-          signateur = await this.prisma.signateurs.create({
-            data: {
-              userId,
-              folderId: id,
-            },
+      const signateurs = await Promise.all(
+        dto.signateurs.map(async (userId, index) => {
+          let signateur = await this.prisma.signateurs.findFirst({
+            where: { userId, folderId: id },
           });
-        }
+
+         if (!signateur) {
+        signateur = await this.prisma.signateurs.create({
+          data: {
+            userId,
+            folderId: id,
+            order: index, 
+          },
+        });
+      }
 
         return signateur;
       }),
     );
-    signateurs.sort((a, b) => dto.signateurs.indexOf(a.userId) - dto.signateurs.indexOf(b.userId));
-    
+
     try {
       for (let i = 0; i < signateurs.length; i++) {
         const idsign = signateurs[i].id;
@@ -493,7 +491,7 @@ export class FoldersService {
         signateurs: {
           include: { user: true },
           orderBy: {
-            createdAt: 'asc',
+            order: 'asc',
           },
         },
         departement: true,
@@ -546,7 +544,7 @@ export class FoldersService {
       include: {
         signateurs: {
           orderBy: {
-            createdAt: 'asc',
+            order: 'asc',
           },
         },
       },
@@ -599,7 +597,7 @@ export class FoldersService {
               user: true,
             },
             orderBy: {
-              createdAt: 'asc',
+              order: 'asc',
             },
           },
           signatures: {
