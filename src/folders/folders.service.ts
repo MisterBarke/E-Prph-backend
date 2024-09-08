@@ -125,7 +125,7 @@ export class FoldersService {
         createdBy: true,
         signateurs: {
           orderBy: {
-            order: 'asc',
+            createdAt: 'asc',
           },
         },
         signatures: true,
