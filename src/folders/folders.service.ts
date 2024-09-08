@@ -364,7 +364,7 @@ export class FoldersService {
       );
     }
 
-    const serviceReseauUser = dto.signateurs.map(async (userId) => {
+   /*  const serviceReseauUser = dto.signateurs.map(async (userId) => {
       let user = await this.prisma.users.findUnique({
         where: { id: userId, departement: { isServiceReseau: true } },
       });
@@ -378,7 +378,7 @@ export class FoldersService {
         'Veuillez sélectionner un signataire du service réseau dans la liste des signataires du dossier',
         400,
       );
-    }
+    } */
     const signateurs = await Promise.all(
       dto.signateurs.map(async (userId) => {
         let signateur = await this.prisma.signateurs.findFirst({
@@ -397,7 +397,8 @@ export class FoldersService {
         return signateur;
       }),
     );
-
+    signateurs.sort((a, b) => dto.signateurs.indexOf(a.userId) - dto.signateurs.indexOf(b.userId));
+    
     try {
       for (let i = 0; i < signateurs.length; i++) {
         const idsign = signateurs[i].id;
