@@ -219,22 +219,6 @@ export class FoldersService {
         400,
       );
     }
-
-   /*  const serviceReseauUser = dto.signateurs.map(async (userId) => {
-      let user = await this.prisma.users.findUnique({
-        where: { id: userId, departement: { isServiceReseau: true } },
-      });
-      return user;
-    });
-    if (
-      connectedUser.departement.isFromNiamey === false &&
-      !serviceReseauUser
-    ) {
-      throw new HttpException(
-        'Veuillez sélectionner un signataire du service réseau dans la liste des signataires du dossier',
-        400,
-      );
-    } */
       const signateurs = await Promise.all(
         dto.signateurs.map(async (userId, index) => {
           let signateur = await this.prisma.signateurs.findFirst({
@@ -276,15 +260,27 @@ export class FoldersService {
         },
       });
 
+      const firstToSign = await this.prisma.signateurs.findFirst({
+        where: { 
+          id: {
+            in: dto.signateurs,
+          },
+          order: 1
+        },
+        include: {
+          user: true
+        }
+      });
+
       await this.mailService.sendNoticationForSignature({
-        email: users[0].email,
+        email: firstToSign.user.email,
         subject: 'Nouvelle demande de signature',
         title: 'Notification de Signature',
         companyName: 'BAGRI Niger',
         companyContry: 'Niger',
         template: 'notification',
         context: {
-          username: users[0].name,
+          username: firstToSign.user.name,
           folderName: folder.title,
           folderNumber: `${folder.number}`,
         },
@@ -304,37 +300,6 @@ export class FoldersService {
     }
   }
 
-  /*async folderValidationByServiceReseau(
-    id: string,
-    data: FolderValidationDto,
-    userId: string,
-  ) {
-    const connectedUser = await this.prisma.users.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    let donne = {};
-    if (!data.isValidate) {
-      donne = {
-        isRejected: true,
-        rejected: {
-          connect: {
-            id: connectedUser.id,
-          },
-        },
-      };
-    }
-    return await this.prisma.folders.update({
-      where: {
-        id,
-      },
-      data: {
-        isValidateBeforeSignature: data.isValidate,
-        ...donne,
-      },
-    });
-  }*/
 
   async signFolder(userId: string, folderId: string, dto: FolderSignatureDto) {
     // Find the connected user based on userId
@@ -377,10 +342,18 @@ export class FoldersService {
     });
     if (signatureExistant) throw new HttpException('Document déjà signé', 400);
 
-    const nextSignateur = folder.signateurs[signaturePosition];
-    if (nextSignateur.userId !== connectedUser.id) {
+    const nextSignatory = await this.prisma.signateurs.findFirst({
+      where:{
+        order: signaturePosition
+      },
+      include:{
+        user:true
+      }
+    })
+    
+    if (nextSignatory.userId !== connectedUser.id) {
       throw new HttpException(
-        `Respecter ordre de signature, ${nextSignateur.user.position} doit d'abord signer`,
+        `Respecter ordre de signature, ${nextSignatory.user.position} doit d'abord signer`,
         400,
       );
     }
@@ -418,6 +391,15 @@ export class FoldersService {
       return 'Tout le monde a signé. Dossier clot';
     }
 
+    const newNextSignatory = await this.prisma.signateurs.findFirst({
+      where:{
+        order: updatedFolder.signaturePosition
+      },
+      include:{
+        user:true
+      }
+    })
+
     const signature = await this.prisma.signatures.create({
       data: {
         signedAt: new Date(),
@@ -427,15 +409,17 @@ export class FoldersService {
       },
     });
 
+    
+
     await this.mailService.sendNoticationForSignature({
-      email: nextSignateur.user.email,
+      email: newNextSignatory.user.email,
       subject: 'Nouvelle demande de signature',
       title: 'Notification de Signature',
       companyName: 'BAGRI Niger',
       companyContry: 'Niger',
       template: 'notification',
       context: {
-        username: nextSignateur.user.name,
+        username: newNextSignatory.user.name,
         folderName: folder.title,
         folderNumber: `${folder.number}`,
       },
