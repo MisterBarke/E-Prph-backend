@@ -73,7 +73,7 @@ export class FoldersController {
     return this.foldersService.create(dto, request.user.id);
   }
 
-  //get all folders
+/*   //get all folders
   @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
@@ -102,7 +102,7 @@ export class FoldersController {
       request.user.id,
     );
   }
-
+ */
   @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
@@ -114,8 +114,8 @@ export class FoldersController {
   @ApiOperation({
     operationId: 'GetAllFoldersByAdmin',
   })
-  @Get('admin_member')
-  findAllAdminMember(
+  @Get('')
+  findAll(
     //@Query('search') search: string,
     @Query()
     {
@@ -123,18 +123,20 @@ export class FoldersController {
       limit = 200,
       dateDebut,
       dateFin,
+      isSigningEnded
     }: PaginationParams,
     @Req() request,
   ) {
-    return this.foldersService.getFoldersByAdmins({
+    return this.foldersService.getAllFolders({
       decalage,
       limit,
       dateDebut,
       dateFin,
+      isSigningEnded
     }, request.user.id);
   }
 
-  //get by signatory
+/*   //get by signatory
 
   @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
@@ -165,9 +167,9 @@ export class FoldersController {
       dateDebut,
       dateFin,
     }, request.user.id);
-  }
+  } */
 //les folders des compatables
-  @ApiCreatedResponse({ description: 'Tous les Folders signés' })
+/*   @ApiCreatedResponse({ description: 'Tous les Folders signés' })
   @ApiResponse({
     status: 200,
     description: 'Les Folders sont retrouvés',
@@ -198,7 +200,7 @@ export class FoldersController {
       dateFin,
       isSigningEnded
     }, request.user.id);
-  }
+  } */
 
   //get one folder
   @ApiCreatedResponse({ description: 'Chercher un Folders' })

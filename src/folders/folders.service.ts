@@ -98,7 +98,7 @@ export class FoldersService {
     return newData;
   }
 
-  async findAll(
+  /* async findAll(
     { limit, decalage, dateDebut, dateFin }: PaginationParams,
     userId: string,
   ) {
@@ -133,10 +133,10 @@ export class FoldersService {
         documents: true,
       },
     });
-  }
+  } */
 
-  async getFoldersByAdmins(
-    { limit, decalage, dateDebut, dateFin }: PaginationParams,
+  async getAllFolders(
+    { limit, decalage, dateDebut, dateFin, isSigningEnded=false, }: PaginationParams,
     userId: string,
   ) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -155,6 +155,7 @@ export class FoldersService {
           createdBy: {
             id: connectedUser.id,
           },
+          isSigningEnded: isSigningEnded ? true : false,
         },
         include: {
           documents: true,
@@ -175,6 +176,9 @@ export class FoldersService {
       return await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
+        where:{
+          isSigningEnded: isSigningEnded ? true : false,
+        },
         include: {
           documents: true,
           departement: true,
@@ -188,9 +192,37 @@ export class FoldersService {
         },
       });
     }
+
+    if (connectedUser.role == 'MEMBER') {
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+          isSigningEnded: isSigningEnded ? true : false,
+          signateurs: {
+            some: {
+              userId: connectedUser.id,
+            },
+          },
+        },
+        include: {
+          documents: true,
+          signateurs: {
+            include: {
+              user: true,
+            },
+            orderBy: {
+              order: 'asc',
+            },
+          },
+          createdBy: true,
+          signatures: true,
+        },
+      });
+    }
   }
 
-  async getFoldersBySignatory(
+ /*  async getFoldersBySignatory(
     { limit, decalage, dateDebut, dateFin }: PaginationParams,
     userId: string,
   ) {
@@ -224,9 +256,9 @@ export class FoldersService {
         signatures: true,
       },
     });
-  }
+  } */
 
-  async getSignedFolders(
+  /* async getSignedFolders(
     {
       limit,
       decalage,
@@ -327,7 +359,7 @@ export class FoldersService {
         },
       });
     }
-  }
+  } */
 
   async assignSignateursToFolder(
     id: string,
