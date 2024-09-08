@@ -146,11 +146,11 @@ export class FoldersService {
           documents: true,
           departement: true,
           createdBy: true,
-        /*   signateurs: {
+          signateurs: {
             orderBy: {
-              createdAt: 'asc',
+              order: 'asc',
             },
-          }, */
+          },
           signatures: true,
         },
       });
@@ -174,9 +174,9 @@ export class FoldersService {
             include: {
               user: true,
             },
-           /*  orderBy: {
+            orderBy: {
               order: 'asc',
-            }, */
+            },
           },
           createdBy: true,
           signatures: true,
@@ -184,6 +184,7 @@ export class FoldersService {
       });
     }
   }
+
 
 
   async assignSignateursToFolder(
@@ -453,9 +454,9 @@ export class FoldersService {
             include: {
               user: true,
             },
-           /*  orderBy: {
+            orderBy: {
               order: 'asc',
-            }, */
+            },
           },
           signatures: {
             include: {
