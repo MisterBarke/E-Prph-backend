@@ -586,20 +586,22 @@ export class FoldersService {
           id,
         },
       });
-
-      await this.mailService.sendNoticationForSignature({
-        email: users[0].email,
+     for (let i = 0; i < users.length; i++) {
+      await this.mailService.courierNotification({
+        email: users[i].email,
         subject: 'Courier',
         title: 'Nouveau Courier',
         companyName: 'BAGRI Niger',
         companyContry: 'Niger',
-        template: 'notification',
+        template: 'courierNotifications',
         context: {
-          username: users[0].name,
+          username: users[i].name,
           folderName: folder.title,
           folderNumber: `${folder.number}`,
         },
       });
+     }
+    
 
       return 'Dossier partagé';
     } catch (error) {
