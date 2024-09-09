@@ -73,36 +73,6 @@ export class FoldersController {
     return this.foldersService.create(dto, request.user.id);
   }
 
-/*   //get all folders
-  @ApiCreatedResponse({ description: 'Tous les Folders' })
-  @ApiResponse({
-    status: 200,
-    description: 'Les Folders sont retrouvés',
-  })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
-  @ApiResponse({ status: 500, description: 'Server Error' })
-  @ApiOperation({
-    operationId: 'GetAllFolders',
-  })
-  @Get('')
-  findAll(
-    //@Query('search') search: string,
-    @Query()
-    {
-      decalage = 0,
-      limit = 100,
-      dateDebut,
-      dateFin,
-    }: PaginationParams,
-    @Req() request,
-  ) {
-    return this.foldersService.findAll(
-      { decalage, limit, dateDebut, dateFin },
-      request.user.id,
-    );
-  }
- */
   @ApiCreatedResponse({ description: 'Tous les Folders' })
   @ApiResponse({
     status: 200,
@@ -263,6 +233,31 @@ export class FoldersController {
     return this.foldersService.shareFolder(id, dto);
   }
 
+  @ApiCreatedResponse({ description: 'Tous les couriers' })
+  @ApiResponse({
+    status: 200,
+    description: 'Les couriers sont retrouvés',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'GetAllCouriers',
+  })
+  @Get('courier')
+  findAllCourier(
+    @Query()
+    {
+      decalage = 0,
+      limit = 200,
+    }: PaginationParams,
+    @Req() request,
+  ) {
+    return this.foldersService.getAllCourier({
+      decalage,
+      limit,
+    }, request.user.id);
+  }
   
   @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({

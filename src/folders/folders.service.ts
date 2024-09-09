@@ -616,4 +616,40 @@ export class FoldersService {
       }
     }
   }
+
+  async getAllCourier(
+    { limit, decalage}: PaginationParams,
+    userId: string,
+  ) {
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where: {
+          sharedTo: {
+            some: {
+              userId: connectedUser.id,
+            },
+          },
+        },
+        include: {
+          documents: true,
+          departement: true,
+          createdBy: true,
+          signateurs: {
+            include: {
+              user: true,
+            },
+            orderBy: { order: 'asc' },
+          },
+          signatures: true,
+        },
+      });
+    }
+
 }
