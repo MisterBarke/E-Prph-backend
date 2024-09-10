@@ -129,18 +129,18 @@ export class UploadService {
         //   });
         // }
 
-        const rest: any = {};
-        if (defaultFolder?.id)
-          rest.folder = {
-            connect: {
-              id: defaultFolder?.id,
-            },
-          };
+        // const rest: any = {};
+        // if (defaultFolder?.id)
+        //   rest.folder = {
+        //     connect: {
+        //       id: defaultFolder?.id,
+        //     },
+        //   };
         const newDocument = await this.prisma.documents.create({
           data: {
             title: file.originalname,
             url,
-            ...rest,
+            // ...rest,
             createdBy: {
               connect: {
                 id: connectedUser.id,
