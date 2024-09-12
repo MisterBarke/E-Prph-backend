@@ -25,6 +25,7 @@ model Users {
   // departementChef Departement[]  @relation("departementChefRelation")
   departement                Departement?     @relation("departements", fields: [departementId], references: [id])
   departementId              String?          @db.ObjectId
+  rejected Folders[]  @relation("rejet")
   folders                    Folders[]
   documents                  Documents[]
   isPasswordInit             Boolean          @default(false)
@@ -57,7 +58,7 @@ model Departement {
   isServiceReseau  Boolean   @default(false)
   isAccountant     Boolean   @default(false)
   isServiceCourier Boolean   @default(false)
-  isFromNiamey     Boolean   @default(false)
+  isAgency     Boolean   @default(false)
   folders          Folders[]
   isDefault        Boolean   @default(false)
   createdAt        DateTime  @default(now())
@@ -74,6 +75,10 @@ model Folders {
   email                 String?
   createdBy             Users        @relation(fields: [createdById], references: [id])
   createdById           String       @db.ObjectId
+  isRejected Boolean @default(false)
+  rejected        Users?     @relation("rejet", fields: [rejectedId], references: [id])
+  rejectedId     String?    @db.ObjectId
+  isValidateBeforeSignature Boolean @default(false)
   signateurs            Signateurs[] @relation("documentssignateurs")
   signatures            Signatures[] @relation("signer")
   documents             Documents[]

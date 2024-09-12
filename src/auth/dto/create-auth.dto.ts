@@ -137,13 +137,13 @@ export class RegisterDto {
 
   @ApiProperty({
     type: 'boolean',
-    name: 'isFromNiamey',
-    description: 'la propriété isFromNiamey de type boolean',
+    name: 'isAgency',
+    description: 'la propriété isAgency de type boolean',
     default: '',
   })
   @IsBoolean()
   @IsOptional()
-  isFromNiamey: boolean;
+  isAgency: boolean;
 }
 
 export class RegisterClientDto {

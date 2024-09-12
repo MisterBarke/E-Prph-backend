@@ -182,7 +182,7 @@ export class AuthService {
       isAccountant,
       position,
       matricule,
-      isFromNiamey,
+      isAgency,
       isServiceCourier
     }: RegisterDto,
     role: Role = Role.MEMBER,
@@ -228,7 +228,7 @@ export class AuthService {
           isCreditAgricole: isCreditAgricole ?? false,
           isServiceReseau: isServiceReseau ?? false,
           isAccountant: isAccountant ?? false,
-          isFromNiamey: isFromNiamey ?? false,
+          isAgency: isAgency ?? false,
           isServiceCourier: isServiceCourier ?? false,
           users: {
             connect: {
