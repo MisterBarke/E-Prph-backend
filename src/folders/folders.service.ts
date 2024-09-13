@@ -4,6 +4,7 @@ import {
   Post,
   ConflictException,
   HttpException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   CreateFoldersDto,
@@ -99,7 +100,7 @@ export class FoldersService {
   }
 
   async getAllFolders(
-    { limit, decalage, dateDebut, dateFin, isSigningEnded=false, }: PaginationParams,
+    { limit, decalage, dateDebut, dateFin, isSigningEnded=false, isValidate = false, isRejected=false }: PaginationParams,
     userId: string,
   ) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -156,6 +157,30 @@ export class FoldersService {
       });
     }
 
+    if (connectedUser.departement.isServiceReseau === true) {
+      return await this.prisma.folders.findMany({
+        skip: +decalage,
+        take: +limit,
+        where:{
+          departement:{
+            isAgency:true
+          }
+          isValidateBeforeSignature: isValidate ? true : false,
+          isRejected: isRejected ? true : false,
+        },
+        include: {
+          documents: true,
+          departement: true,
+          createdBy: true,
+          signateurs: {
+            orderBy: {
+              order: 'asc',
+            },
+          },
+        },
+      });
+    }
+
     if (connectedUser.role == 'MEMBER') {
       return await this.prisma.folders.findMany({
         skip: +decalage,
@@ -186,6 +211,37 @@ export class FoldersService {
   }
 
 
+  async folderValidationByServiceReseau(
+    id: string,
+    data: FolderValidationDto,
+    userId: string
+  ) {
+    const connectedUser = await this.prisma.users.findUnique({
+      where: {
+        id: userId
+      },
+    });
+    let donne = {};
+    if (!data.isValidate) {
+      donne = {
+        isRejected: true,
+        rejected: {
+          connect: {
+            id: connectedUser.id,
+          },
+        },
+      };
+    }
+    return await this.prisma.folders.update({
+      where: {
+        id,
+      },
+      data: {
+        isValidateBeforeSignature: data.isValidate,
+        ...donne,
+      },
+    });
+  }
 
   async assignSignateursToFolder(
     id: string,
@@ -201,6 +257,9 @@ export class FoldersService {
         departement: true,
       },
     });
+    if (connectedUser.role !== 'ADMIN_MEMBER') {
+      throw new UnauthorizedException();
+    }
     const users = await this.prisma.users.findMany({
       where: {
         id: {

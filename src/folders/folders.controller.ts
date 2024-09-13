@@ -158,6 +158,49 @@ export class FoldersController {
     return this.foldersService.update(id, dto);
   }
 
+
+  @ApiCreatedResponse({ description: 'Modification de Folders' })
+  @ApiResponse({
+    status: 200,
+    description: 'Folders est modifié',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiBody({ type: FolderValidationDto })
+  @ApiOperation({
+    operationId: 'validateFolders',
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          encoding: {
+            about: {
+              contentType: 'application/json',
+            },
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              about: { type: 'array', items: { type: 'number' } },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Put(':id/service_reseau')
+  updateFolder(
+    @Param('id') id: string,
+    @Body() dto: FolderValidationDto,
+    @Req() request,
+  ) {
+    return this.foldersService.folderValidationByServiceReseau(
+      id,
+      dto,
+      request.user.id,
+    );
+  }
+
   @ApiCreatedResponse({ description: 'Modification de Folders' })
   @ApiResponse({
     status: 200,
