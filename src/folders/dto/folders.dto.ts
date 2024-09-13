@@ -220,6 +220,17 @@ export class PaginationParams {
   @Type(() => Boolean)
   @IsBoolean()
   isSigningEnded?: boolean;
+
+  
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isValidate?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isRejected?: boolean;
 }
 
 export class FolderVisibilityByAccountantDto {

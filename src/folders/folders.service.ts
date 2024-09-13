@@ -164,7 +164,7 @@ export class FoldersService {
         where:{
           departement:{
             isAgency:true
-          }
+          },
           isValidateBeforeSignature: isValidate ? true : false,
           isRejected: isRejected ? true : false,
         },
