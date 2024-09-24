@@ -66,6 +66,8 @@ export class UploadService {
       const fileUrl = `https://${this.bucketName}.s3.${this.configService.get<string>(
         'AWS_REGION',
       )}.amazonaws.com/${fileName}`;
+      console.log(fileUrl);
+      
 
       if (signature) {
         await this.prisma.users.update({
@@ -74,6 +76,9 @@ export class UploadService {
         });
       } else {
         const connectedUser = await this.prisma.users.findFirst({ where: { id: userId } });
+        console.log(connectedUser.name);
+
+        
         const newDocument = await this.prisma.documents.create({
           data: {
             title: file.originalname,
@@ -81,9 +86,10 @@ export class UploadService {
             createdBy: { connect: { id: connectedUser.id } },
           },
         });
+        console.log('new doc  '+ newDocument);
+        
         return newDocument;
       }
-
       return {
         url: fileUrl,
         originalname: file.originalname,
