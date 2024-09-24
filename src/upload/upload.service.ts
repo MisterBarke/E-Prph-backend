@@ -16,13 +16,13 @@ export class UploadService {
     private configService: ConfigService,
   ) {
    this.s3Client = new S3Client({
-      region: this.configService.get<string>('aws-region'),
+      region: this.configService.get<string>('aws_region'),
       credentials: {
-        accessKeyId: this.configService.get<string>('aws-access-key-id'),
-        secretAccessKey: this.configService.get<string>('aws-access-key'),
+        accessKeyId: this.configService.get<string>('aws_access_key_id'),
+        secretAccessKey: this.configService.get<string>('aws_access_key'),
       },
     });
-    this.bucketName = this.configService.get<string>('aws-s3-bucket');
+    this.bucketName = this.configService.get<string>('aws_s3_bucket');
   }
   async getFiles(userId: string) {
     const connectedUser = await this.prisma.users.findFirst({
@@ -64,7 +64,7 @@ export class UploadService {
       const result = await this.s3Client.send(new PutObjectCommand(uploadParams));
 
       const fileUrl = `https://${this.bucketName}.s3.${this.configService.get<string>(
-        'aws-region',
+        'aws_region',
       )}.amazonaws.com/${fileName}`;
 
       if (signature) {
