@@ -1,4 +1,0 @@
-Service reseau
-Le role de validation du service reseau doit etre supprimer 
-Il reçoit une demande de signature comme tous les autres signataires
-S'il a une suggestion sur un dossier comment est ce que le departement pourra t-il modifier le dossier afin de corriger le problème?

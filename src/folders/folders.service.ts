@@ -324,7 +324,6 @@ export class FoldersService {
           id: {
             in: dto.signateurs,
           },
-          order: 1
         },
         include: {
           user: true
