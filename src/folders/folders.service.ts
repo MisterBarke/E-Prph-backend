@@ -330,7 +330,7 @@ export class FoldersService {
         }
       });
 
-      await this.mailService.sendNoticationForSignature({
+      /* await this.mailService.sendNoticationForSignature({
         email: firstToSign.user.email,
         subject: 'Nouvelle demande de signature',
         title: 'Notification de Signature',
@@ -342,7 +342,7 @@ export class FoldersService {
           folderName: folder.title,
           folderNumber: `${folder.number}`,
         },
-      });
+      }); */
 
       return 'Signatories added';
     } catch (error) {
