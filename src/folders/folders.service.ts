@@ -319,30 +319,20 @@ export class FoldersService {
         },
       });
 
-      const firstToSign = await this.prisma.signateurs.findFirst({
-        where: { 
-          id: {
-            in: dto.signateurs,
-          },
-        },
-        include: {
-          user: true
-        }
-      });
 
-      /* await this.mailService.sendNoticationForSignature({
-        email: firstToSign.user.email,
+      await this.mailService.sendNoticationForSignature({
+        email: users[0].email,
         subject: 'Nouvelle demande de signature',
         title: 'Notification de Signature',
         companyName: 'BAGRI Niger',
         companyContry: 'Niger',
         template: 'notification',
         context: {
-          username: firstToSign.user.name,
+          username: users[0].name,
           folderName: folder.title,
           folderNumber: `${folder.number}`,
         },
-      }); */
+      });
 
       return 'Signatories added';
     } catch (error) {
