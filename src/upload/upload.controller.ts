@@ -18,17 +18,20 @@ export class UploadController {
 
   @Post('file')
   @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './storage',
-        filename: (req, file, callback) => {
-          const name = `ph_${Math.ceil(
-            Math.random() * 1000,
-          )}ph_${Date.now()}ph_${file.originalname}`;
-          return callback(null, name);
-        },
-      }),
-    }),
+    FileInterceptor(
+      'file',
+      //   {
+      //   storage: diskStorage({
+      //     destination: './storage',
+      //     filename: (req, file, callback) => {
+      //       const name = `ph_${Math.ceil(
+      //         Math.random() * 1000,
+      //       )}ph_${Date.now()}ph_${file.originalname}`;
+      //       return callback(null, name);
+      //     },
+      //   }),
+      // }
+    ),
   )
   public async uploadFile(
     @UploadedFile() file,
@@ -42,15 +45,15 @@ export class UploadController {
   @Post('file/client')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './storage',
-        filename: (req, file, callback) => {
-          const name = `ph_${Math.ceil(
-            Math.random() * 1000,
-          )}ph_${Date.now()}ph_${file.originalname}`;
-          return callback(null, name);
-        },
-      }),
+      // storage: diskStorage({
+      //   destination: './storage',
+      //   filename: (req, file, callback) => {
+      //     const name = `ph_${Math.ceil(
+      //       Math.random() * 1000,
+      //     )}ph_${Date.now()}ph_${file.originalname}`;
+      //     return callback(null, name);
+      //   },
+      // }),
     }),
   )
   public async uploadClientFile(
@@ -59,7 +62,7 @@ export class UploadController {
     @Req() request,
   ) {
     const user = request.user;
-    return this.uploadService.uploadClientFile(file,user.id);
+    return this.uploadService.uploadClientFile(file, user.id);
   }
 
   @Get('files')

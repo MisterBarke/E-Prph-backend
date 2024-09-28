@@ -2,9 +2,14 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { PrismaService } from '../prisma/prisma.service';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class UploadService {
@@ -15,7 +20,7 @@ export class UploadService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-   this.s3Client = new S3Client({
+    this.s3Client = new S3Client({
       region: this.configService.get<string>('AWS_REGION'),
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
@@ -34,7 +39,7 @@ export class UploadService {
       },
     });
     const folder = await this.prisma.folders.findFirst({
-      where: {  
+      where: {
         departement: {
           id: connectedUser.departement?.id,
         },
@@ -43,8 +48,19 @@ export class UploadService {
         documents: true,
       },
     });
-
-    return folder?.documents;
+    const documents = folder.documents;
+    for (const doc of documents) {
+      const getObjectData = {
+        Bucket: this.bucketName,
+        Key: doc?.url,
+      };
+      const commad = new GetObjectCommand(getObjectData);
+      const url = await getSignedUrl(this.s3Client, commad, {
+        expiresIn: 3600,
+      });
+      doc.url = url;
+    }
+    return documents;
   }
 
   async uploadFile(
@@ -61,24 +77,22 @@ export class UploadService {
     };
 
     try {
-      const result = await this.s3Client.send(new PutObjectCommand(uploadParams));
+      const result = await this.s3Client.send(
+        new PutObjectCommand(uploadParams),
+      );
 
-      const fileUrl = `https://${this.bucketName}.s3.${this.configService.get<string>(
-        'AWS_REGION',
-      )}.amazonaws.com/${fileName}`;
-      console.log(fileUrl);
-      
-
+      const fileUrl = `${fileName}`;
       if (signature) {
         await this.prisma.users.update({
           where: { id: userId },
           data: { userSignatureUrl: fileUrl },
         });
       } else {
-        const connectedUser = await this.prisma.users.findFirst({ where: { id: userId } });
+        const connectedUser = await this.prisma.users.findFirst({
+          where: { id: userId },
+        });
         console.log(connectedUser.name);
 
-        
         const newDocument = await this.prisma.documents.create({
           data: {
             title: file.originalname,
@@ -86,8 +100,6 @@ export class UploadService {
             createdBy: { connect: { id: connectedUser.id } },
           },
         });
-        console.log('new doc  '+ newDocument);
-        
         return newDocument;
       }
       return {
@@ -100,8 +112,6 @@ export class UploadService {
       throw new Error('Failed to upload file to S3');
     }
   }
-
-
 
   async uploadClientFile(file: Express.Multer.File, userId?: string) {
     const folder = 'dossiers';
