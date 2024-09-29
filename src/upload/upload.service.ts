@@ -29,6 +29,17 @@ export class UploadService {
     });
     this.bucketName = this.configService.get<string>('AWS_S3_BUCKET');
   }
+  async getSignedUrl(fileKey: string): Promise<string> {
+    const getObjectData = {
+      Bucket: this.bucketName,
+      Key: fileKey,
+    };
+    const command = new GetObjectCommand(getObjectData);
+    return await getSignedUrl(this.s3Client, command, {
+      expiresIn: 3600,
+    });
+  }
+
   async getFiles(userId: string) {
     const connectedUser = await this.prisma.users.findFirst({
       where: {
@@ -40,7 +51,7 @@ export class UploadService {
     });
     const folder = await this.prisma.folders.findFirst({
       where: {
-        departement: {
+        departement: { 
           id: connectedUser.departement?.id,
         },
       },
@@ -50,15 +61,10 @@ export class UploadService {
     });
     const documents = folder.documents;
     for (const doc of documents) {
-      const getObjectData = {
-        Bucket: this.bucketName,
-        Key: doc?.url,
-      };
-      const commad = new GetObjectCommand(getObjectData);
-      const url = await getSignedUrl(this.s3Client, commad, {
-        expiresIn: 3600,
-      });
-      doc.url = url;
+      if (doc?.url) {
+        const signedUrl = await this.getSignedUrl(doc.url);
+        doc.url = signedUrl;
+      }
     }
     return documents;
   }

@@ -19,12 +19,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { log } from 'console';
 import { MailService } from 'src/mail/mail.service';
+import { UploadService } from 'src/upload/upload.service';
 
 @Injectable()
 export class FoldersService {
   constructor(
     private prisma: PrismaService,
     private mailService: MailService,
+    private uploadService: UploadService
   ) {}
 
   async create(dto: CreateFoldersDto, userId: string) {
@@ -111,8 +113,9 @@ export class FoldersService {
         departement: true,
       },
     });
+    let folders = []
     if (connectedUser.role === 'ADMIN_MEMBER') {
-      return await this.prisma.folders.findMany({
+    folders = await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where: {
@@ -133,11 +136,19 @@ export class FoldersService {
           },
           signatures: true,
         },
+        
       });
+      for (const folder of folders) {
+        for (const doc of folder.documents) {
+          const url = await this.uploadService.getSignedUrl(doc.url); 
+          doc.url = url;
+        }
+      }  
+      return folders;  
     }
 
     if (connectedUser.role == 'ADMIN') {
-      return await this.prisma.folders.findMany({
+      folders = await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where:{
@@ -155,10 +166,17 @@ export class FoldersService {
           signatures: true,
         },
       });
+      for (const folder of folders) {
+        for (const doc of folder.documents) {
+          const url = await this.uploadService.getSignedUrl(doc.url); 
+          doc.url = url;
+        }
+      }  
+      return folders;  
     }
 
     if (connectedUser.departement.isServiceReseau === true) {
-      return await this.prisma.folders.findMany({
+      folders = await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where:{
@@ -179,10 +197,17 @@ export class FoldersService {
           },
         },
       });
+      for (const folder of folders) {
+        for (const doc of folder.documents) {
+          const url = await this.uploadService.getSignedUrl(doc.url); 
+          doc.url = url;
+        }
+      }  
+      return folders;  
     }
 
     if (connectedUser.role == 'MEMBER') {
-      return await this.prisma.folders.findMany({
+      folders = await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where: {
@@ -207,6 +232,14 @@ export class FoldersService {
           signatures: true,
         },
       });
+
+      for (const folder of folders) {
+        for (const doc of folder.documents) {
+          const url = await this.uploadService.getSignedUrl(doc.url); 
+          doc.url = url;
+        }
+      }  
+      return folders;  
     }
   }
 
