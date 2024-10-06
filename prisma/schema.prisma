@@ -90,7 +90,7 @@ model Folders {
   isSigningEnded        Boolean      @default(false)
   isVisibleByAccountant Boolean      @default(false)
   number                Int?
-  sharedTo               ShareFolderTo[] @relation("shareTo")
+  sharedTo               shareFolderTo[] @relation("shareTo")
 }
 
 //Definis les signateurs pour un dossier

@@ -603,6 +603,10 @@ export class FoldersService {
       where: { folderId: id },
     });
 
+    await this.prisma.shareFolderTo.deleteMany({
+      where: { folderId: id },
+    });
+
     // Supprimer le dossier
     const deletedFolder = await this.prisma.folders.delete({
       where: { id },
