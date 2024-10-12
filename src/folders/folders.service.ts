@@ -405,7 +405,6 @@ export class FoldersService {
       },
     });
     if (!folder) throw new HttpException('Le dossier est incorrect', 400);
-
     const signaturePosition = folder.signaturePosition;
 
     const userSignateur = folder.signateurs.find(
@@ -425,12 +424,15 @@ export class FoldersService {
 
     const nextSignatory = await this.prisma.signateurs.findFirst({
       where:{
-        order: signaturePosition
+        order: signaturePosition,
+        folderId
       },
       include:{
         user:true
       }
     })
+    console.log("nexsignatory  "+nextSignatory.user.email);
+    
     
     if (nextSignatory.userId !== connectedUser.id) {
       throw new HttpException(
@@ -472,14 +474,14 @@ export class FoldersService {
       return 'Tout le monde a signé. Dossier clot';
     }
 
-    const newNextSignatory = await this.prisma.signateurs.findFirst({
+    /* const newNextSignatory = await this.prisma.signateurs.findFirst({
       where:{
         order: updatedFolder.signaturePosition
       },
       include:{
         user:true
       }
-    })
+    }) */
 
     const signature = await this.prisma.signatures.create({
       data: {
@@ -492,7 +494,7 @@ export class FoldersService {
 
     
 
-    await this.mailService.sendNoticationForSignature({
+    /* await this.mailService.sendNoticationForSignature({
       email: newNextSignatory.user.email,
       subject: 'Nouvelle demande de signature',
       title: 'Notification de Signature',
@@ -504,7 +506,7 @@ export class FoldersService {
         folderName: folder.title,
         folderNumber: `${folder.number}`,
       },
-    });
+    }); */
 
     return signature;
   }
