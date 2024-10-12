@@ -134,7 +134,7 @@ export class AuthService {
 
   async signJwt(userId: string, payload) {
     const data = {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, { expiresIn: '1d' }),
       refresh_token: this.jwtService.sign({ userId }, { expiresIn: '1d' }),
     };
     const r = this.jwtService.decode(data.access_token);
