@@ -494,20 +494,6 @@ export class FoldersService {
 
     
 
-    /* await this.mailService.sendNoticationForSignature({
-      email: newNextSignatory.user.email,
-      subject: 'Nouvelle demande de signature',
-      title: 'Notification de Signature',
-      companyName: 'BAGRI Niger',
-      companyContry: 'Niger',
-      template: 'notification',
-      context: {
-        username: newNextSignatory.user.name,
-        folderName: folder.title,
-        folderNumber: `${folder.number}`,
-      },
-    }); */
-
     return signature;
   }
 
