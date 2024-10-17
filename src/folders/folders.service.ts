@@ -143,6 +143,13 @@ export class FoldersService {
           const url = await this.uploadService.getSignedUrl(doc.url); 
           doc.url = url;
         }
+        for (const signateur of folder.signateurs) {
+          if (signateur.user && signateur.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
+            signateur.user.userSignatureUrl = signedUrl;
+          }
+        }
+
       }  
       return folders;  
     }
@@ -170,6 +177,12 @@ export class FoldersService {
         for (const doc of folder.documents) {
           const url = await this.uploadService.getSignedUrl(doc.url); 
           doc.url = url;
+        }
+        for (const signateur of folder.signateurs) {
+          if (signateur.user && signateur.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
+            signateur.user.userSignatureUrl = signedUrl;
+          }
         }
       }  
       return folders;  
@@ -201,6 +214,12 @@ export class FoldersService {
         for (const doc of folder.documents) {
           const url = await this.uploadService.getSignedUrl(doc.url); 
           doc.url = url;
+        }
+        for (const signateur of folder.signateurs) {
+          if (signateur.user && signateur.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
+            signateur.user.userSignatureUrl = signedUrl;
+          }
         }
       }  
       return folders;  
@@ -237,6 +256,12 @@ export class FoldersService {
         for (const doc of folder.documents) {
           const url = await this.uploadService.getSignedUrl(doc.url); 
           doc.url = url;
+        }
+        for (const signateur of folder.signateurs) {
+          if (signateur.user && signateur.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
+            signateur.user.userSignatureUrl = signedUrl;
+          }
         }
       }  
       return folders;  
@@ -499,7 +524,7 @@ export class FoldersService {
 
   async findOne(id: string) {
     try {
-      return await this.prisma.folders.findUnique({
+      const oneFolder = await this.prisma.folders.findUnique({
         where: { id },
         include: {
           createdBy: true,
@@ -520,10 +545,24 @@ export class FoldersService {
           documents: true,
         },
       });
-    } catch (error) {
+
+        for (const doc of oneFolder.documents) {
+          const url = await this.uploadService.getSignedUrl(doc.url); 
+          doc.url = url;
+        }
+        for (const signateur of oneFolder.signateurs) {
+          if (signateur.user && signateur.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
+            signateur.user.userSignatureUrl = signedUrl;
+          }
+        }
+        return oneFolder
+      }  
+     catch (error) {
       console.log(error);
     }
-  }
+      }
+  
 
   async update(id, dto: UpdateFoldersDto) {
     const data = await this.findOne(id);

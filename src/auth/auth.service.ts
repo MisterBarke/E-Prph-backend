@@ -54,7 +54,7 @@ export class AuthService {
         id: data?.userId,
       },
     });
-    if (!user) throw new HttpException('Veuiler se connecter', 401);
+    if (!user) throw new HttpException('Veuillez vous connecter', 401);
     const { password, ...rest } = user;
     const res = await this.signJwt(user.id, rest);
     return res;
