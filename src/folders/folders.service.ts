@@ -151,6 +151,12 @@ export class FoldersService {
             signateur.user.userSignatureUrl = signedUrl;
           }
         }
+        for (const signature of folder.signatures) {
+          if (signature.user && signature.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
+            signature.user.userSignatureUrl = signedUrl;
+          }
+        }
 
       }  
       return folders;  
@@ -191,6 +197,12 @@ export class FoldersService {
           if (signateur.user && signateur.user.userSignatureUrl) {
             const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
             signateur.user.userSignatureUrl = signedUrl;
+          }
+        }
+        for (const signature of folder.signatures) {
+          if (signature.user && signature.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
+            signature.user.userSignatureUrl = signedUrl;
           }
         }
       }  
@@ -238,6 +250,12 @@ export class FoldersService {
             signateur.user.userSignatureUrl = signedUrl;
           }
         }
+        for (const signature of folder.signatures) {
+          if (signature.user && signature.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
+            signature.user.userSignatureUrl = signedUrl;
+          }
+        }
       }  
       return folders;  
     }
@@ -278,6 +296,12 @@ export class FoldersService {
           if (signateur.user && signateur.user.userSignatureUrl) {
             const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
             signateur.user.userSignatureUrl = signedUrl;
+          }
+        }
+        for (const signature of folder.signatures) {
+          if (signature.user && signature.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
+            signature.user.userSignatureUrl = signedUrl;
           }
         }
       }  
@@ -570,6 +594,13 @@ export class FoldersService {
           if (signateur.user && signateur.user.userSignatureUrl) {
             const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
             signateur.user.userSignatureUrl = signedUrl;
+          }
+        }
+
+        for (const signature of oneFolder.signatures) {
+          if (signature.user && signature.user.userSignatureUrl) {
+            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
+            signature.user.userSignatureUrl = signedUrl;
           }
         }
         return oneFolder 
