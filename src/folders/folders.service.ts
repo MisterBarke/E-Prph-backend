@@ -134,7 +134,9 @@ export class FoldersService {
             },
             orderBy: { order: 'asc' },
           },
-          signatures: true,
+          signatures: {
+            include:{ user:true}
+          },
         },
         
       });
@@ -169,8 +171,15 @@ export class FoldersService {
             orderBy: {
               order: 'asc',
             },
+            include: {
+              user: true
+            }
           },
-          signatures: true,
+          signatures: {
+            include:{
+              user: true
+            }
+          },
         },
       });
       for (const folder of folders) {
@@ -207,7 +216,15 @@ export class FoldersService {
             orderBy: {
               order: 'asc',
             },
+            include:{
+              user: true
+            }
           },
+          signatures: {
+            include:{
+              user: true
+            }
+          }
         },
       });
       for (const folder of folders) {
@@ -248,7 +265,7 @@ export class FoldersService {
             },
           },
           createdBy: true,
-          signatures: true,
+          signatures: {include: {user:true}},
         },
       });
 
@@ -523,7 +540,6 @@ export class FoldersService {
   }
 
   async findOne(id: string) {
-    try {
       const oneFolder = await this.prisma.folders.findUnique({
         where: { id },
         include: {
@@ -545,7 +561,7 @@ export class FoldersService {
           documents: true,
         },
       });
-
+        
         for (const doc of oneFolder.documents) {
           const url = await this.uploadService.getSignedUrl(doc.url); 
           doc.url = url;
@@ -556,11 +572,7 @@ export class FoldersService {
             signateur.user.userSignatureUrl = signedUrl;
           }
         }
-        return oneFolder
-      }  
-     catch (error) {
-      console.log(error);
-    }
+        return oneFolder 
       }
   
 
@@ -580,7 +592,7 @@ export class FoldersService {
     });
   }
 
-  async updateVisibilityByAccountant(
+  async updateVisibilityByAccountant(  
     folderId: string,
     data: FolderVisibilityByAccountantDto,
     userId: string,
