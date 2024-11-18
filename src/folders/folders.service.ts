@@ -530,15 +530,14 @@ export class FoldersService {
       },
     });
 
-    /* if (updatedFolder.signaturePosition === folder.signateurs.length) {
+    if (updatedFolder.signaturePosition === folder.signateurs.length) {
       await this.prisma.folders.update({
         where: { id: folderId },
         data: {
           isSigningEnded: true,
         },
       });
-      return 'Tout le monde a signé. Dossier clot';
-    } */
+    }
 
     /* const newNextSignatory = await this.prisma.signateurs.findFirst({
       where:{
