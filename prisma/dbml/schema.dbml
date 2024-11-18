@@ -1,0 +1,213 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Users {
+  id String [pk]
+  email String [unique, not null]
+  password String [not null, default: '']
+  refresh_token String
+  phone String [not null]
+  matricule String
+  position String
+  name String
+  userSignatureUrl String
+  isSignateurDossierAgricole Boolean [not null, default: false]
+  role Role [not null]
+  signatures Signatures [not null]
+  signateursRole Signateurs [not null]
+  departement Departement
+  departementId String
+  rejected Folders [not null]
+  folders Folders [not null]
+  documents Documents [not null]
+  isPasswordInit Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  isPasswordForgotten Boolean [not null, default: false]
+  location String
+  folderViewers FolderViewer [not null]
+  folderSharedTo ShareFolderTo [not null]
+}
+
+Table Documents {
+  id String [pk]
+  url String [not null]
+  title String [not null]
+  createdBy Users [not null]
+  createdById String [not null]
+  folder Folders
+  folderId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Departement {
+  id String [pk]
+  title String [not null]
+  users Users [not null]
+  isCreditAgricole Boolean [not null, default: false]
+  isServiceReseau Boolean [not null, default: false]
+  isAccountant Boolean [not null, default: false]
+  isServiceCourier Boolean [not null, default: false]
+  isAgency Boolean [not null, default: false]
+  folders Folders [not null]
+  isDefault Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Folders {
+  id String [pk]
+  title String [not null]
+  description String [not null]
+  nom String
+  adress String
+  telephone String
+  email String
+  createdBy Users [not null]
+  createdById String [not null]
+  isRejected Boolean [not null, default: false]
+  rejected Users
+  rejectedId String
+  isValidateBeforeSignature Boolean [not null, default: false]
+  signateurs Signateurs [not null]
+  signatures Signatures [not null]
+  documents Documents [not null]
+  departement Departement [not null]
+  departementId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  signaturePosition Int [not null, default: 0]
+  isSigningEnded Boolean [not null, default: false]
+  isVisibleByAccountant Boolean [not null, default: false]
+  number Int
+  sharedTo ShareFolderTo [not null]
+}
+
+Table Signateurs {
+  id String [pk]
+  user Users [not null]
+  userId String [not null]
+  folder Folders [not null]
+  folderId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  hasSigned Boolean [not null, default: false]
+  order Int [not null]
+}
+
+Table ShareFolderTo {
+  id String [pk]
+  user Users [not null]
+  userId String [not null]
+  folder Folders [not null]
+  folderId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Signatures {
+  id String [pk]
+  user Users [not null]
+  userId String [not null]
+  folder Folders [not null]
+  folderId String [not null]
+  description String [not null]
+  signedAt DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table ClientUser {
+  id String [pk]
+  email String [unique, not null]
+  password String [not null, default: '']
+  refresh_token String
+  phone String [not null]
+  name String
+  role Role [not null]
+  clientsFolders ClientsFolders [not null]
+  documents ClientsDocuments [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  isPasswordForgotten Boolean [not null, default: false]
+  location String
+  address String
+}
+
+Table ClientsFolders {
+  id String [pk]
+  title String [not null]
+  description String [not null]
+  createdByClient ClientUser [not null]
+  createdByClientId String [not null]
+  documents ClientsDocuments [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  viewers FolderViewer [not null]
+}
+
+Table ClientsDocuments {
+  id String [pk]
+  url String [not null]
+  title String [not null]
+  createdByClient ClientUser [not null]
+  createdByClientId String [not null]
+  clientsFolders ClientsFolders [not null]
+  folderId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table FolderViewer {
+  id String [pk]
+  folder ClientsFolders [not null]
+  folderId String [not null]
+  user Users [not null]
+  userId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Enum Role {
+  ADMIN
+  MEMBER
+  ADMIN_MEMBER
+  SUDO
+  CLIENT
+}
+
+Ref: Users.departementId > Departement.id
+
+Ref: Documents.createdById > Users.id
+
+Ref: Documents.folderId > Folders.id
+
+Ref: Folders.createdById > Users.id
+
+Ref: Folders.rejectedId > Users.id
+
+Ref: Folders.departementId > Departement.id
+
+Ref: Signateurs.userId > Users.id
+
+Ref: Signateurs.folderId > Folders.id
+
+Ref: ShareFolderTo.userId > Users.id
+
+Ref: ShareFolderTo.folderId > Folders.id
+
+Ref: Signatures.userId > Users.id
+
+Ref: Signatures.folderId > Folders.id
+
+Ref: ClientsFolders.createdByClientId > ClientUser.id
+
+Ref: ClientsDocuments.createdByClientId > ClientUser.id
+
+Ref: ClientsDocuments.folderId > ClientsFolders.id
+
+Ref: FolderViewer.folderId > ClientsFolders.id
+
+Ref: FolderViewer.userId > Users.id

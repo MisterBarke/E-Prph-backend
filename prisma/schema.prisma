@@ -6,7 +6,9 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
-
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 model Users {
   id                         String           @id @default(auto()) @map("_id") @db.ObjectId
   email                      String           @unique

@@ -23,15 +23,7 @@ export class UsersService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    // this.supabaseClient = createClient(
-    //   this.configService.get<string>('supabase.url'),
-    //   this.configService.get<string>('supabase.key'),
-    //   {
-    //     auth: {
-    //       persistSession: false,
-    //     },
-    //   },
-    // );
+
   }
   async findDuplicates(data) {
     const duplicateValues = await this.prisma.users.findFirst({

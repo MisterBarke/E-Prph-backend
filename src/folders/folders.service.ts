@@ -530,7 +530,7 @@ export class FoldersService {
       },
     });
 
-    if (updatedFolder.signaturePosition === folder.signateurs.length) {
+    /* if (updatedFolder.signaturePosition === folder.signateurs.length) {
       await this.prisma.folders.update({
         where: { id: folderId },
         data: {
@@ -538,7 +538,7 @@ export class FoldersService {
         },
       });
       return 'Tout le monde a signé. Dossier clot';
-    }
+    } */
 
     /* const newNextSignatory = await this.prisma.signateurs.findFirst({
       where:{
@@ -572,7 +572,7 @@ export class FoldersService {
             include: {
               user: true,
             },
-            orderBy: {
+            orderBy: { 
               order: 'asc',
             },
           },
