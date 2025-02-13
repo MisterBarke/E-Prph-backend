@@ -609,7 +609,7 @@ export class FoldersService {
   async update(id, dto: UpdateFoldersDto) {
     const data = await this.findOne(id);
     if (!data) throw new NotFoundException("L'identifiant id n'existe pas");
-    return await this.prisma.folders.update({
+     const updatedFields = await this.prisma.folders.update({
       where: { id },
       data: {
         title: dto.title ?? data.title,
@@ -620,6 +620,25 @@ export class FoldersService {
         email: dto.email ?? data.email,
       },
     });
+    if(dto.files){
+    for (let i = 0; i < dto.files.length; i++) {
+        const element = dto.files[i];
+        await this.prisma.documents.update({
+          where: {
+            id: element.id,
+          },
+          data: {
+            title: element.title,
+            folder: {
+              connect: {
+                id: id,
+              },
+            },
+          },
+        });
+      }
+    }
+    return updatedFields
   }
 
   async updateVisibilityByAccountant(  

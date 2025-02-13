@@ -54,7 +54,7 @@ export class FolderValidationDto {
   @ApiProperty({
     type: 'boolean',
     name: 'isValidate',
-    description: 'la propriété isValidate de type string',
+    description: 'la propriété isValidate de type bool',
     default: true,
   })
   @IsBoolean()
@@ -66,7 +66,7 @@ export class FolderSignatureDto {
   @ApiProperty({
     type: 'string',
     name: 'description',
-    description: 'la propriété description de type bool',
+    description: 'la propriété description de type string',
     default: true,
   })
   @IsString()
