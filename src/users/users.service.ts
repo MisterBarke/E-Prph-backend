@@ -18,7 +18,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
-  supabaseClient: SupabaseClient;
+  
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,

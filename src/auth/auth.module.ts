@@ -26,7 +26,7 @@ import { ClientAuthService } from './clientAuth.service';
           signOptions: {
             expiresIn: config.get<string>('jwt.expire'),
           },
-        };
+        };  
       },
       inject: [ConfigService],
     }),

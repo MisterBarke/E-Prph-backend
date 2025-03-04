@@ -102,7 +102,15 @@ export class FoldersService {
   }
 
   async getAllFolders(
-    { limit, decalage, dateDebut, dateFin, isSigningEnded=false, isValidate = false, isRejected=false }: PaginationParams,
+    { 
+      limit,
+      decalage,
+      dateDebut,
+      dateFin,
+      isSigningEnded=false,
+      isValidate = false,
+      isRejected=false
+    }: PaginationParams,
     userId: string,
   ) {
     const connectedUser = await this.prisma.users.findUnique({
@@ -114,14 +122,42 @@ export class FoldersService {
       },
     });
     let folders = []
-    if (connectedUser.role === 'ADMIN_MEMBER') {
     folders = await this.prisma.folders.findMany({
         skip: +decalage,
         take: +limit,
         where: {
-          createdBy: {
-            id: connectedUser.id,
-          },
+          OR:[
+            {
+              createdBy: {
+                id: connectedUser.id,
+              },
+            },
+            {
+              isSigningEnded: isSigningEnded ? true : false,
+            },
+            {
+              departement:{
+                isAgency:true
+              },
+              isValidateBeforeSignature: isValidate ? true : false,
+              isRejected: isRejected ? true : false,
+            },
+            {
+              isSigningEnded: isSigningEnded ? true : false,
+              signateurs: {
+                some: {
+                  userId: connectedUser.id,
+                },
+              },
+            },
+            {
+              sharedTo:{
+                some:{
+                  userId: connectedUser.id
+                }
+              }
+            }
+          ],
           isSigningEnded: isSigningEnded ? true : false,
         },
         include: {
@@ -161,154 +197,6 @@ export class FoldersService {
       }  
       return folders;  
     }
-
-    if (connectedUser.role == 'ADMIN') {
-      folders = await this.prisma.folders.findMany({
-        skip: +decalage,
-        take: +limit,
-        where:{
-          isSigningEnded: isSigningEnded ? true : false,
-        },
-        include: {
-          documents: true,
-          departement: true,
-          createdBy: true,
-          signateurs: {
-            orderBy: {
-              order: 'asc',
-            },
-            include: {
-              user: true
-            }
-          },
-          signatures: {
-            include:{
-              user: true
-            }
-          },
-        },
-      });
-      for (const folder of folders) {
-        for (const doc of folder.documents) {
-          const url = await this.uploadService.getSignedUrl(doc.url); 
-          doc.url = url;
-        }
-        for (const signateur of folder.signateurs) {
-          if (signateur.user && signateur.user.userSignatureUrl) {
-            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
-            signateur.user.userSignatureUrl = signedUrl;
-          }
-        }
-        for (const signature of folder.signatures) {
-          if (signature.user && signature.user.userSignatureUrl) {
-            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
-            signature.user.userSignatureUrl = signedUrl;
-          }
-        }
-      }  
-      return folders;  
-    }
-
-    if (connectedUser.departement.isServiceReseau === true) {
-      folders = await this.prisma.folders.findMany({
-        skip: +decalage,
-        take: +limit,
-        where:{
-          departement:{
-            isAgency:true
-          },
-          isValidateBeforeSignature: isValidate ? true : false,
-          isRejected: isRejected ? true : false,
-        },
-        include: {
-          documents: true,
-          departement: true,
-          createdBy: true,
-          signateurs: {
-            orderBy: {
-              order: 'asc',
-            },
-            include:{
-              user: true
-            }
-          },
-          signatures: {
-            include:{
-              user: true
-            }
-          }
-        },
-      });
-      for (const folder of folders) {
-        for (const doc of folder.documents) {
-          const url = await this.uploadService.getSignedUrl(doc.url); 
-          doc.url = url;
-        }
-        for (const signateur of folder.signateurs) {
-          if (signateur.user && signateur.user.userSignatureUrl) {
-            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
-            signateur.user.userSignatureUrl = signedUrl;
-          }
-        }
-        for (const signature of folder.signatures) {
-          if (signature.user && signature.user.userSignatureUrl) {
-            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
-            signature.user.userSignatureUrl = signedUrl;
-          }
-        }
-      }  
-      return folders;  
-    }
-
-    if (connectedUser.role == 'MEMBER') {
-      folders = await this.prisma.folders.findMany({
-        skip: +decalage,
-        take: +limit,
-        where: {
-          isSigningEnded: isSigningEnded ? true : false,
-          signateurs: {
-            some: {
-              userId: connectedUser.id,
-            },
-          },
-        },
-        include: {
-          documents: true,
-          signateurs: {
-            include: {
-              user: true,
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-          createdBy: true,
-          signatures: {include: {user:true}},
-        },
-      });
-
-      for (const folder of folders) {
-        for (const doc of folder.documents) {
-          const url = await this.uploadService.getSignedUrl(doc.url); 
-          doc.url = url;
-        }
-        for (const signateur of folder.signateurs) {
-          if (signateur.user && signateur.user.userSignatureUrl) {
-            const signedUrl = await this.uploadService.getSignedUrl(signateur.user.userSignatureUrl);
-            signateur.user.userSignatureUrl = signedUrl;
-          }
-        }
-        for (const signature of folder.signatures) {
-          if (signature.user && signature.user.userSignatureUrl) {
-            const signedUrl = await this.uploadService.getSignedUrl(signature.user.userSignatureUrl);
-            signature.user.userSignatureUrl = signedUrl;
-          }
-        }
-      }  
-      return folders;  
-    }
-  }
-
 
   async folderValidationByServiceReseau(
     id: string,
@@ -562,9 +450,9 @@ export class FoldersService {
     return signature;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId: string) {
       const oneFolder = await this.prisma.folders.findUnique({
-        where: { id },
+        where: { id, createdBy:{id: userId} },
         include: {
           createdBy: true,
           signateurs: {
@@ -606,8 +494,8 @@ export class FoldersService {
       }
   
 
-  async update(id, dto: UpdateFoldersDto) {
-    const data = await this.findOne(id);
+  async updateFolder(id: string, userId: string, dto: UpdateFoldersDto) {
+    const data = await this.findOne(id, userId);
     if (!data) throw new NotFoundException("L'identifiant id n'existe pas");
      const updatedFields = await this.prisma.folders.update({
       where: { id },
@@ -620,7 +508,7 @@ export class FoldersService {
         email: dto.email ?? data.email,
       },
     });
-    if(dto.files){
+    
     for (let i = 0; i < dto.files.length; i++) {
         const element = dto.files[i];
         await this.prisma.documents.update({
@@ -637,7 +525,7 @@ export class FoldersService {
           },
         });
       }
-    }
+    
     return updatedFields
   }
 
@@ -702,6 +590,20 @@ export class FoldersService {
 
     return deletedFolder;
   }
+
+  async deleteFile(fileId:  string, userId: string){
+    const connectedUser = await this.prisma.users.findUnique({where:{
+      id: userId
+    }})
+    const deleteFile = await this.prisma.documents.delete({where: {
+     id: fileId, 
+     createdBy:{
+      id: connectedUser.id
+     }
+    }})
+    return deleteFile
+   }
+ 
 
   async shareFolder(id: string, dto: ShareToDto) {
     if (!dto?.sharedTo || !dto?.sharedTo?.length) return;

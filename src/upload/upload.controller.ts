@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Post,
   Query,
@@ -80,4 +81,5 @@ export class UploadController {
     const user = request.user;
     return this.uploadService.uploadFile(file, true, user.id);
   }
+
 }

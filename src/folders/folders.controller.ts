@@ -35,7 +35,7 @@ import {
 import { request } from 'http';
 import { ClientsFoldersService } from './clientsFolders.service';
 
-@ApiTags('folders')
+  @ApiTags('folders')
 @Controller('folders')
 export class FoldersController {
   constructor(private foldersService: FoldersService, private clientsFoldersService: ClientsFoldersService) {}
@@ -119,8 +119,8 @@ export class FoldersController {
     operationId: 'GetOneFolders',
   })
   @Get(':id/get_one')
-  findOne(@Param('id') id: string) {
-    return this.foldersService.findOne(id);
+  findOne(@Param('id') id: string, @Req() request) {
+    return this.foldersService.findOne(id, request.user.id);
   }
 
   // edit folder
@@ -154,8 +154,8 @@ export class FoldersController {
     },
   })
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateFoldersDto) {
-    return this.foldersService.update(id, dto);
+  update(@Param('id') id: string, @Req() request, @Body() dto: UpdateFoldersDto) {
+    return this.foldersService.updateFolder(id, request.user.id, dto);
   }
 
 
@@ -357,7 +357,24 @@ export class FoldersController {
   }
 
 
-  //CLIENT OPERATIONS
+  @ApiCreatedResponse({ description: 'Supprimer document' })
+  @ApiResponse({
+    status: 200,
+    description: 'Le document est suprimé',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found, le id est introuvable' })
+  @ApiResponse({ status: 500, description: 'Server Error' })
+  @ApiOperation({
+    operationId: 'SoftDeleteDocument',
+  })
+  @Delete(':id/file')
+  deleteFile(@Param() fileId: string, @Req() request){
+    return this.foldersService.deleteFile(fileId, request.user.id)
+  }
+
+
+  //CLIENT OPERATIONS/////////////////////////////////////////////////////////
 
   @ApiCreatedResponse({ description: 'Créer un nouveau Folder client' })
   @ApiResponse({

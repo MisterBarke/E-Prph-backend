@@ -69,6 +69,7 @@ export class UploadService {
     return documents;
   }
 
+  
   async uploadFile(
     file: Express.Multer.File,
     signature = false,
@@ -97,7 +98,6 @@ export class UploadService {
         const connectedUser = await this.prisma.users.findFirst({
           where: { id: userId },
         });
-        console.log(connectedUser.name);
 
         const newDocument = await this.prisma.documents.create({
           data: {
