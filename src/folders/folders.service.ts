@@ -133,9 +133,6 @@ export class FoldersService {
               },
             },
             {
-              isSigningEnded: isSigningEnded ? true : false,
-            },
-            {
               departement:{
                 isAgency:true
               },
@@ -143,7 +140,6 @@ export class FoldersService {
               isRejected: isRejected ? true : false,
             },
             {
-              isSigningEnded: isSigningEnded ? true : false,
               signateurs: {
                 some: {
                   userId: connectedUser.id,
