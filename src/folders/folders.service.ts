@@ -448,7 +448,12 @@ export class FoldersService {
 
   async findOne(id: string, userId: string) {
       const oneFolder = await this.prisma.folders.findUnique({
-        where: { id, createdBy:{id: userId} },
+          where: { id, 
+          OR:[
+            {createdBy:{id: userId}},
+            {signateurs:{some:{userId}}}
+          ]
+         },
         include: {
           createdBy: true,
           signateurs: {
